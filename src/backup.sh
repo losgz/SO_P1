@@ -17,6 +17,16 @@ function backup() {
 
 CHECKING="0"
 
+while getopts "c" opt; do
+    case $opt in
+        c)
+            CHECKING="1"
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
 if [[ ! -d "$1" ]]; then
     echo "placeHolder"
     exit 1;
