@@ -17,6 +17,7 @@ fi
 
 for file in "$WORKDIR"/*; do
     if [[ -d $file ]]; then
+        echo "1"
         continue;
     fi
     cpprint $file "$BACKUP/$(basename $file)"
