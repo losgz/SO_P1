@@ -28,7 +28,7 @@ done
 shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
-    echo "$1 not a dir"
+    echo "placeHolder"
     exit 1;
 fi
 
