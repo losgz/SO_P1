@@ -16,19 +16,26 @@ function backup() {
 }
 
 CHECKING="0"
+ERRORS="0"
+WARNINGS="0"
+FILES_UPDATED="0"
+FILES_COPIED="0"
+FILES_DELETED="0"
 
-while getopts "c" opt; do
+while getopts "cb" opt; do
     case $opt in
         c)
             CHECKING="1"
             ;;
+        b)
+            
     esac
 done
 
 shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
-    echo "placeHolder"
+    echo "$1 not a dir"
     exit 1;
 fi
 
@@ -44,9 +51,12 @@ BACKUP_PATH="$BACKUP"
 while [[ "$BACKUP_PATH" != "/" ]]; do
     if [[ $WORKDIR == $BACKUP_PATH ]]; then
         echo "WORKDIR is parent"
+        ((ERRORS++))
+        summary
         exit 1
     fi
     BACKUP_PATH="$(dirname "$BACKUP_PATH")"
 done
 
 backup "$WORKDIR" "$BACKUP"
+summary

@@ -8,8 +8,11 @@ function mkdirprint(){
     return 0;
 }
 
-function cpprint(){
+function summary() {
+    echo "While backign $(basename "$WORKDIR"): $ERRORS ERRORS; $WARNINGS WARNINGS; $FILES_UPDATED Updated; $FILES_COPIED Copied; $FILES_DELETED Deleted"
+}
 
+function cpprint(){
     FILE_MODE_DATE=$(stat -c %Y "$1")
     if [[ -f $2 ]]; then
         BAK_FILE_DATE=$(stat -c %Y "$2")
@@ -18,14 +21,17 @@ function cpprint(){
                 cp -a "$1" "$2";
             fi
             echo "cp -a $1 $2"
+            ((FILES_UPDATED++))
         else
-            echo "$2 is newer than $1"
+            echo "WARNING: backup entry $2 is newer than $1; Should not happen"
+            ((WARNINGS++))
         fi
     else
         if [[ $CHECKING -eq 0 ]]; then
             cp -a "$1" "$2";
         fi
         echo "cp -a $1 $2"
+        ((FILES_COPIED++))
         return 0;
     fi
     return 0;
