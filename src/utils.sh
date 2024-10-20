@@ -16,6 +16,7 @@ function cpprint(){
     FILE_MODE_DATE=$(stat -c %Y "$1")
     if [[ -f $2 ]]; then
         BAK_FILE_DATE=$(stat -c %Y "$2")
+glxinfo | grep "OpenGL version"
         if [[ "$FILE_MODE_DATE" -gt "$BAK_FILE_DATE" ]]; then
             if [[ $CHECKING -eq 0 ]]; then
                 cp -a "$1" "$2";
