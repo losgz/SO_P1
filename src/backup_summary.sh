@@ -20,10 +20,10 @@ function backup_delete() {
         if [[ -d "$file" ]]; then
             backup_delete "$file" "$2/$(basename "$file")"
         else 
-            if [[ ! -f "$1/$(basename $file)" ]]; then
+            if [[ ! -f "$1/$(basename "$file")" ]]; then
                 (( SIZE_REMOVED+=$(stat -c %s "$file") ))
                 ((FILES_DELETED++))
-                rm $file
+                rm "$file"
             fi
         fi
     done
@@ -35,10 +35,9 @@ function check_regex() {
     local test_string=""
     if [[ "$test_string" =~ $regex ]]; then
         echo "Valid regex"
-    else
-        if [[ $? -eq 2 ]]; then
-            exit 1
-        fi
+    elif [[ $? -eq 2 ]]; then
+        echo "Invalid Regex"
+        exit 1
     fi
 }
 
@@ -113,12 +112,12 @@ done
 
 if [[ -z $DIRS_FILE ]]; then
     backup "$WORKDIR" "$BACKUP"
-    backup_delete $WORKDIR $BACKUP
+    backup_delete "$WORKDIR" "$BACKUP"
 else
     n=${#DIRS[@]}
     for ((i=0;i < n; i++)); do
         backup "${DIRS[i]}" "$BACKUP"
-        backup_delete ${DIRS[i]} $BACKUP
+        backup_delete "${DIRS[i]}" "$BACKUP"
     done
 fi
 
