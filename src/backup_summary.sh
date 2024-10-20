@@ -17,14 +17,13 @@ function backup() {
 
 check_regex() {
     local regex="$1"
-    echo "" | sed -E "/$regex/ d" 2>/dev/null
-
-    if [[ $? -ne 0 ]]; then
-        echo "Invalid regex: $regex"
-        return 1
+    local test_string=""
+    if [[ "$test_string" =~ $regex ]]; then
+        echo "Valid regex"
     else
-        echo "Valid regex: $regex"
-        return 0
+        if [[ $? -eq 2 ]]; then
+            exit 1
+        fi
     fi
 }
 
@@ -40,7 +39,7 @@ CHECKING="0"
 DIRS_FILE=""
 FILE_FILTER=""
 
-while getopts "c:b:r:" opt; do
+while getopts "cb:r:" opt; do
     case $opt in
         c)
             CHECKING="1"
@@ -53,7 +52,6 @@ while getopts "c:b:r:" opt; do
             fi
             mapfile -t DIRS < "$DIRS_FILE"
             echo "${DIRS[@]}"
-            exit 0
             ;;
         r)
             FILE_FILTER="$OPTARG"
@@ -95,6 +93,13 @@ while [[ "$BACKUP_PATH" != "/" ]]; do
     fi
     BACKUP_PATH="$(dirname "$BACKUP_PATH")"
 done
+if [[ ! -z $DIRS_FILE ]]; then
+    backup "$WORKDIR" "$BACKUP"
+else
+    n=${#DIRS[@]}
+    for ((i=0;i < n; i++)); do
+        backup "${DIRS[i]}" "$BACKUP"
+    done
+fi
 
-backup "$WORKDIR" "$BACKUP"
 summary
