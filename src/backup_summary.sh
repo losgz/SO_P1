@@ -15,7 +15,7 @@ function backup() {
     done
 }
 
-check_regex() {
+function check_regex() {
     local regex="$1"
     local test_string=""
     if [[ "$test_string" =~ $regex ]]; then
@@ -37,7 +37,10 @@ FILES_DELETED="0"
 # Variables for the opts
 CHECKING="0"
 DIRS_FILE=""
-FILE_FILTER=""
+REGEX=""
+DIRS=()
+SIZE_COPIED="0"
+SIZE_REMOVED="0"
 
 while getopts "cb:r:" opt; do
     case $opt in
@@ -48,14 +51,14 @@ while getopts "cb:r:" opt; do
             DIRS_FILE="$OPTARG"
             if [[ ! -f $DIRS_FILE || ! -r $DIRS_FILE ]]; then
                 echo "$DIRS_FILE isn't a valid file"
-                exit 1
+                DIRS_FILE=""
             fi
             mapfile -t DIRS < "$DIRS_FILE"
             echo "${DIRS[@]}"
             ;;
         r)
-            FILE_FILTER="$OPTARG"
-            check_regex "$FILE_FILTER"
+            REGEX="$OPTARG"
+            check_regex "$REGEX"
             ;;
         \?)
             echo "Invalid option: -$OPTARG"
@@ -93,7 +96,8 @@ while [[ "$BACKUP_PATH" != "/" ]]; do
     fi
     BACKUP_PATH="$(dirname "$BACKUP_PATH")"
 done
-if [[ ! -z $DIRS_FILE ]]; then
+
+if [[ -z $DIRS_FILE ]]; then
     backup "$WORKDIR" "$BACKUP"
 else
     n=${#DIRS[@]}
