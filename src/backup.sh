@@ -10,17 +10,43 @@ function backup() {
         if [[ -d "$file" ]]; then
             backup "$file" "$2/$(basename "$file")"
         else 
-            cpprint "$file" "$2/$(basename "$file")"
+            cpprint2 "$file" "$2/$(basename "$file")"
         fi
     done
 }
 
+# Variables for the opts
 CHECKING="0"
+DIRS_FILE=""
+REGEX=""
+DIRS=()
+SIZE_COPIED="0"
+SIZE_REMOVED="0"
 
-while getopts "c" opt; do
+while getopts "cb:r:" opt; do
     case $opt in
         c)
             CHECKING="1"
+            ;;
+        b)
+            DIRS_FILE="$OPTARG"
+            if [[ ! -f $DIRS_FILE || ! -r $DIRS_FILE ]]; then
+                echo "$DIRS_FILE isn't a valid file"
+                DIRS_FILE=""
+            fi
+            mapfile -t DIRS < "$DIRS_FILE"
+            ;;
+        r)
+            REGEX="$OPTARG"
+            check_regex "$REGEX"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG"
+            exit 1
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument."
+            exit 1
             ;;
     esac
 done
