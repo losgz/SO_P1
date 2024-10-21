@@ -1,10 +1,11 @@
 #!/bin/bash
 
 function mkdirprint(){
+    echo "mkdir $1"
     if [[ $CHECKING -eq 0 ]]; then
         mkdir "$1";
+        return $?;
     fi
-    echo "mkdir $1"
     return 0;
 }
 
@@ -14,31 +15,49 @@ function summary() {
 
 function cpprint(){
     FILE_MODE_DATE=$(stat -c %Y "$1")
+    if [ -f "$2" ]; then
+        BAK_FILE_DATE=$(stat -c %Y "$2")
+        if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
+            echo "WARNING: backup entry $2 is newer than $1; Should not happen"
+            ((WARNINGS++))
+            return 1;
+        fi
+    fi
+    echo "cp -a $1 $2"
+    ((FILES_UPDATED++))
+    if [[ $CHECKING -eq 0 ]]; then
+        cp -a "$1" "$2";
+        return $?;
+    fi
+    return 0;
+}
+
+
+function cpprint2(){
+    FILE_MODE_DATE=$(stat -c %Y "$1")
+    # Olha acho escolher os ficheiros com regex na main era mais eficiente
+    # Ainda não testei nova versão
     if [[ "$(basename "$2")" =~ $REGEX ]]; then
-        if [[ -f $2 ]]; then
+        if [ -f "$2"]; then
             BAK_FILE_DATE=$(stat -c %Y "$2")
-            if [[ "$FILE_MODE_DATE" -gt "$BAK_FILE_DATE" ]]; then
-                if [[ $CHECKING -eq 0 ]]; then
-                    cp -a "$1" "$2";
-                fi
-                echo "cp -a $1 $2"
-                ((FILES_UPDATED++))
-            else
+            if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
                 echo "WARNING: backup entry $2 is newer than $1; Should not happen"
                 ((WARNINGS++))
             fi
+            ((FILES_UPDATED++))
         else
-            if [[ $CHECKING -eq 0 ]]; then
-                cp -a "$1" "$2";
-            fi
-            echo "cp -a $1 $2"
-            local file_size="$(stat -c %s "$1")"
             ((FILES_COPIED++))
-            (( SIZE_COPIED+=$(stat -c %s "$1") ))
-            return 0;
         fi
-    else
-        echo "$(basename $2) doen't match $REGEX"
+        echo "cp -a $1 $2"
+        if [[ $CHECKING -eq 0 ]]; then
+            cp -a "$1" "$2";
+            return $?;
+        fi
+        #elses
+        #    local file_size="$(stat -c %s "$1")"
+        #    (( SIZE_COPIED+=$(stat -c %s "$1") ))
+        #    return 0;
+        #fi
     fi
     return 0;
 }

@@ -10,7 +10,7 @@ function backup() {
         if [[ -d "$file" ]]; then
             backup "$file" "$2/$(basename "$file")"
         else 
-            cpprint "$file" "$2/$(basename "$file")"
+            cpprint2 "$file" "$2/$(basename "$file")"
         fi
     done
 }
