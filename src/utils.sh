@@ -38,7 +38,7 @@ function cpprint2(){
     # Olha acho escolher os ficheiros com regex na main era mais eficiente
     # Ainda não testei nova versão
     if [[ "$(basename "$2")" =~ $REGEX ]]; then
-        if [ -f "$2"]; then
+        if [ -f "$2" ]; then
             BAK_FILE_DATE=$(stat -c %Y "$2")
             if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
                 echo "WARNING: backup entry $2 is newer than $1; Should not happen"
