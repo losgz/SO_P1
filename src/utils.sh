@@ -47,6 +47,9 @@ function cpprint2(){
             ((FILES_UPDATED++))
         else
             ((FILES_COPIED++))
+            local file_size="$(stat -c %s "$1")"
+            (( SIZE_COPIED+=$(stat -c %s "$1") ))
+            return 0;
         fi
         echo "cp -a $1 $2"
         if [[ $CHECKING -eq 0 ]]; then
@@ -54,9 +57,6 @@ function cpprint2(){
             return $?;
         fi
         #elses
-        #    local file_size="$(stat -c %s "$1")"
-        #    (( SIZE_COPIED+=$(stat -c %s "$1") ))
-        #    return 0;
         #fi
     fi
     return 0;
