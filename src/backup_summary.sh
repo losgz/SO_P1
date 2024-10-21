@@ -23,10 +23,7 @@ function backup_delete() {
             if [[ ! -f "$1/$(basename "$file")" ]]; then
                 (( SIZE_REMOVED+=$(stat -c %s "$file") ))
                 ((FILES_DELETED++))
-                echo "rm $file"
-                if [[ $CHECKING -eq "0" ]]; then
-                    rm "$file"
-                fi
+                rm "$file"
             fi
         fi
     done
