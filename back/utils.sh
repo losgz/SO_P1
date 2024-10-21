@@ -18,7 +18,6 @@ function cpprint(){
         echo "$(basename $2) doesnt match regex"
         return 1;
     fi
-    echo "$1"
     FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
         BAK_FILE_DATE=$(stat -c %Y "$2")

@@ -34,16 +34,3 @@ for file in "$WORKDIR"/*; do
     cpprint $file "$BACKUP/$(basename $file)"
 done
 
-if [[ ! -d "$2" ]]; then
-    return 0;
-fi
-for file in "$2"/*; do 
-    if [[ -f "$1/$(basename "$file")" ]]; then
-        continue;
-    fi
-    ((SIZE_REMOVED+=$(stat -c %s "$file") ))
-    ((FILES_DELETED++))
-    if [[ $CHECKING -eq "0" ]]; then
-        rm "$file"
-    fi
-done
