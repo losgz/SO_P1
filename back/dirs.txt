@@ -1,4 +1,0 @@
-/home/losg/Documents/c
-backup.sh
-~/SO/projeto1/back/balls.txt
-chaliça/

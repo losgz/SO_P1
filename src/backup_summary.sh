@@ -61,6 +61,29 @@ function backup_delete() {
     done
 }
 
+function backup_delete_some() {
+    if [[ ! -d "$2" ]]; then
+        return 0;
+    fi
+    for file in "$2"/*; do
+        if is_in_list "$file" "${DIRS[@]}" ; then
+            continue;
+        fi
+        if [[ -d "$file" ]]; then
+            backup_delete "$file" "$2/$(basename "$file")"
+            continue;
+        fi 
+        if [[ -f "$1/$(basename "$file")" ]]; then
+            continue;
+        fi
+        ((SIZE_REMOVED+=$(stat -c %s "$file") ))
+        ((FILES_DELETED++))
+        if [[ $CHECKING -eq "0" ]]; then
+            rm "$file"
+        fi
+    done
+}
+
 # Variables for Summary
 ERRORS="0"
 WARNINGS="0"
