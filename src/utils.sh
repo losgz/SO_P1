@@ -1,7 +1,8 @@
 #!/bin/bash
 
 function mkdirprint(){
-    echo "mkdir $1"
+    local simpler_name="${1#$(dirname "$BACKUP")/}"
+    echo "mkdir $simpler_name"
     if [[ $CHECKING -eq 0 ]]; then
         mkdir "$1";
         return $?;
@@ -14,6 +15,8 @@ function summary() {
 }
 
 function cpprint(){
+    local simpler_name_workdir="${1#$(dirname "$WORKDIR")/}"
+    local simpler_name_backup="${2#$(dirname "$BACKUP")/}"
     local FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
         local BAK_FILE_DATE=$(stat -c %Y "$2")
@@ -22,7 +25,7 @@ function cpprint(){
             return 1;
         fi
     fi
-    echo "cp -a $1 $2"
+    echo "cp -a $simpler_name_workdir $simpler_name_backup"
     if [[ $CHECKING -eq 0 ]]; then
         cp -a "$1" "$2";
         return $?;

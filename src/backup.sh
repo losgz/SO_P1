@@ -37,7 +37,7 @@ function backup_some() {
 }
 
 function backup_delete() {
-    if [[ ! -d "$2" ]]; then
+    if [[ ! -d "$2" || -n "$2" ]]; then
         return 0;
     fi
     for file in "$2"/*; do
@@ -59,7 +59,7 @@ function backup_delete() {
 }
 
 function backup_delete_some() {
-    if [[ ! -d "$2" ]]; then
+    if [[ ! -d "$2" || -n "$2" ]]; then
         return 0;
     fi
     for file in "$2"/*; do
