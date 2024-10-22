@@ -14,21 +14,15 @@ function summary() {
 }
 
 function cpprint(){
-    if [[ ! "$(basename "$2")" =~ $REGEX ]]; then
-        echo "$(basename $2) doesnt match regex"
-        return 1;
-    fi
-    FILE_MODE_DATE=$(stat -c %Y "$1")
+    local FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
-        BAK_FILE_DATE=$(stat -c %Y "$2")
+        local BAK_FILE_DATE=$(stat -c %Y "$2")
         if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
             echo "WARNING: backup entry $2 is newer than $1; Should not happen"
-            ((WARNINGS++))
             return 1;
         fi
     fi
     echo "cp -a $1 $2"
-    ((FILES_UPDATED++))
     if [[ $CHECKING -eq 0 ]]; then
         cp -a "$1" "$2";
         return $?;
@@ -38,13 +32,9 @@ function cpprint(){
 
 
 function cpprint_summary(){
-    if [[ ! "$(basename "$2")" =~ $REGEX ]]; then
-        echo "$(basename $2) doesnt match regex"
-        return 1;
-    fi
-    FILE_MODE_DATE=$(stat -c %Y "$1")
+    local FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
-        BAK_FILE_DATE=$(stat -c %Y "$2")
+        local BAK_FILE_DATE=$(stat -c %Y "$2")
         if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
             echo "WARNING: backup entry $2 is newer than $1; Should not happen"
             ((WARNINGS++))
@@ -52,7 +42,6 @@ function cpprint_summary(){
         fi
         ((FILES_UPDATED++))
     else
-        local file_size="$(stat -c %s "$1")"
         (( SIZE_COPIED+=$(stat -c %s "$1") ))
         ((FILES_COPIED++))
     fi
@@ -62,4 +51,27 @@ function cpprint_summary(){
         return $?;
     fi
     return 0;
+}
+
+function is_in_list(){
+    local arg="$(realpath "$1")"
+    shift
+    local list=("$@")
+    for item in "${list[@]}"; do
+        if [[ $(realpath "$(eval echo "$item")") == $arg ]]; then
+            return 0;
+        fi
+    done
+    return 1;
+}
+
+function check_regex() {
+    local regex="$1"
+    local test_string=""
+    if [[ "$test_string" =~ $regex ]]; then
+        echo "Valid regex"
+    elif [[ $? -eq 2 ]]; then
+        echo "Invalid Regex"
+        exit 1
+    fi
 }

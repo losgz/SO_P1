@@ -9,9 +9,30 @@ function backup() {
     for file in "$1"/*; do
         if [[ -d "$file" ]]; then
             backup "$file" "$2/$(basename "$file")"
-        else 
-            cpprint_summary "$file" "$2/$(basename "$file")"
+            continue;
+        elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
+            echo "$(basename $2) doesnt match regex"
+            continue;
         fi
+        cpprint_summary "$file" "$2/$(basename "$file")"
+    done
+}
+
+function backup_some() {
+    if [[ ! -d "$2" ]]; then
+        mkdirprint "$2";
+    fi
+    for file in "$1"/*; do
+        if is_in_list "$file" "${DIRS[@]}" ; then
+            continue;
+        fi
+        if [[ -d "$file" ]]; then
+            backup "$file" "$2/$(basename "$file")"
+        elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
+            echo "$(basename $2) doesnt match regex"
+            continue;
+        fi
+        cpprint_summary "$file" "$2/$(basename "$file")"
     done
 }
 
@@ -21,29 +42,23 @@ function backup_delete() {
     fi
     for file in "$2"/*; do
         if [[ -d "$file" ]]; then
-            backup_delete "$file" "$2/$(basename "$file")"
-        else 
-            if [[ -f "$1/$(basename "$file")" ]]; then
+            local directory=$file
+            backup_delete "$1/$(basename "$file")" "$2/$(basename "$file")"
+            if [[ ! -d "$1/$(basename "$file")" ]]; then
+                rmdir "$directory"
                 continue;
             fi
-            ((SIZE_REMOVED+=$(stat -c %s "$file") ))
-            ((FILES_DELETED++))
-            if [[ $CHECKING -eq "0" ]]; then
-                rm "$file"
-            fi
+            continue;
+        fi 
+        if [[ -f "$1/$(basename "$file")" ]]; then
+            continue;
+        fi
+        ((SIZE_REMOVED+=$(stat -c %s "$file") ))
+        ((FILES_DELETED++))
+        if [[ $CHECKING -eq "0" ]]; then
+            rm "$file"
         fi
     done
-}
-
-function check_regex() {
-    local regex="$1"
-    local test_string=""
-    if [[ "$test_string" =~ $regex ]]; then
-        echo "Valid regex"
-    elif [[ $? -eq 2 ]]; then
-        echo "Invalid Regex"
-        exit 1
-    fi
 }
 
 # Variables for Summary
@@ -72,7 +87,13 @@ while getopts "cb:r:" opt; do
                 echo "$DIRS_FILE isn't a valid file"
                 DIRS_FILE=""
             fi
-            mapfile -t DIRS < "$DIRS_FILE"
+            lines=()
+            mapfile -t lines < "$DIRS_FILE"
+            for line in "${lines[@]}"; do
+                if [[ -e $(eval echo "$line") ]]; then
+                    DIRS+=("$line")
+                fi
+            done
             ;;
         r)
             REGEX="$OPTARG"
@@ -116,14 +137,11 @@ while [[ "$BACKUP_PATH" != "/" ]]; do
 done
 
 if [[ -z $DIRS_FILE ]]; then
-    backup "$WORKDIR" "$BACKUP"
     backup_delete "$WORKDIR" "$BACKUP"
+    backup "$WORKDIR" "$BACKUP"
 else
-    n=${#DIRS[@]}
-    for ((i=0;i < n; i++)); do
-        backup "${DIRS[i]}" "$BACKUP"
-        backup_delete "${DIRS[i]}" "$BACKUP"
-    done
+    backup_delete_some "$WORKDIR" "$BACKUP"
+    backup_some "$WORKDIR" "$BACKUP"
 fi
 
 summary

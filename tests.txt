@@ -1,0 +1,4 @@
+REGEX afeta diretorios
+regex para eliminar
+pasta contam como itens para os eliminados
+espaços nos ficheiros é para lidar
