@@ -2,4 +2,6 @@ REGEX afeta diretorios
 regex para eliminar
 pasta contam como itens para os eliminados
 espaços nos ficheiros é para lidar
-Os prints dos ficheiros tem de ser de caminhos relativos à pasta 
+Os prints dos ficheiros tem de ser de caminhos relativos à pasta
+Quando as diretorias são pai e filho criamos a pasta?
+Se já tivermos os ficheiros na pasta backup mas agora estão no ignore.txt é para apagar ou mexer?
