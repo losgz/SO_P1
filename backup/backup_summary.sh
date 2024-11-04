@@ -7,29 +7,13 @@ function backup() {
         mkdirprint "$2";
     fi
     for file in "$1"/*; do
-        if [[ -d "$file" ]]; then
-            backup "$file" "$2/$(basename "$file")"
-            continue;
-        elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
-            echo "$(basename $2) doesnt match regex"
-            continue;
-        fi
-        cpprint_summary "$file" "$2/$(basename "$file")"
-    done
-}
-
-function backup_some() {
-    if [[ ! -d "$2" ]]; then
-        mkdirprint "$2";
-    fi
-    for file in "$1"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
             backup "$file" "$2/$(basename "$file")"
+            continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
-            echo "$(basename $2) doesnt match regex"
             continue;
         fi
         cpprint_summary "$file" "$2/$(basename "$file")"
@@ -41,6 +25,9 @@ function backup_delete() {
         return 0;
     fi
     for file in "$2"/*; do
+        if is_in_list "$file" "${DIRS[@]}" ; then
+            continue;
+        fi
         if [[ -d "$file" ]]; then
             local directory=$file
             backup_delete "$1/$(basename "$file")" "$2/$(basename "$file")"
@@ -48,29 +35,6 @@ function backup_delete() {
                 rmdir "$directory"
                 continue;
             fi
-            continue;
-        fi 
-        if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
-            continue;
-        fi
-        ((SIZE_REMOVED+=$(stat -c %s "$file") ))
-        ((FILES_DELETED++))
-        if [[ $CHECKING -eq "0" ]]; then
-            rm "$file"
-        fi
-    done
-}
-
-function backup_delete_some() {
-    if [[ ! -d "$2" || ! -n "$2" ]]; then
-        return 0;
-    fi
-    for file in "$2"/*; do
-        if is_in_list "$file" "${DIRS[@]}" ; then
-            continue;
-        fi
-        if [[ -d "$file" ]]; then
-            backup_delete "$file" "$2/$(basename "$file")"
             continue;
         fi 
         if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
@@ -121,6 +85,11 @@ while getopts "cb:r:" opt; do
         r)
             REGEX="$OPTARG"
             check_regex "$REGEX"
+            if [[ $? -eq 1 ]]; then
+                ((ERRORS++))
+                summary
+                exit 1
+            fi
             ;;
         \?)
             echo "Invalid option: -$OPTARG"
@@ -151,7 +120,7 @@ BACKUP_PATH="$BACKUP"
 
 while [[ "$BACKUP_PATH" != "/" ]]; do
     if [[ $WORKDIR == $BACKUP_PATH ]]; then
-        echo "$WORKDIR is a parent to $BACKUP"
+        echo "ERROR: $WORKDIR is a parent to $BACKUP"
         ((ERRORS++))
         summary
         exit 1
@@ -159,12 +128,7 @@ while [[ "$BACKUP_PATH" != "/" ]]; do
     BACKUP_PATH="$(dirname "$BACKUP_PATH")"
 done
 
-if [[ -z $DIRS_FILE ]]; then
-    backup_delete "$WORKDIR" "$BACKUP"
-    backup "$WORKDIR" "$BACKUP"
-else
-    backup_delete_some "$WORKDIR" "$BACKUP"
-    backup_some "$WORKDIR" "$BACKUP"
-fi
+backup_delete "$WORKDIR" "$BACKUP"
+backup "$WORKDIR" "$BACKUP"
 
 summary

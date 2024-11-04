@@ -6,3 +6,7 @@ Os prints dos ficheiros tem de ser de caminhos relativos à pasta
 Quando as diretorias são pai e filho criamos a pasta?
 Se já tivermos os ficheiros na pasta backup mas agora estão no ignore.txt é para apagar ou mexer?
 Taças solução tá janky?
+return 1 quando é warning
+
+
+use overleaf?

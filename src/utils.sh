@@ -76,7 +76,8 @@ function check_regex() {
     if [[ "$test_string" =~ $regex ]]; then
         echo "Valid regex"
     elif [[ $? -eq 2 ]]; then
-        echo "Invalid Regex"
-        exit 1
+        echo "ERROR: Invalid Regex"
+        return 1
     fi
+    return 0
 }
