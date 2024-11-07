@@ -29,7 +29,7 @@ function backup_delete() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            if [[ ! -d "$1/$(basename "$file")" ]]; then
+            if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
                 rm -rf "$file"
                 continue;
             fi
@@ -114,5 +114,5 @@ while [[ "$BACKUP_PATH" != "/" ]]; do
     BACKUP_PATH="$(dirname "$BACKUP_PATH")"
 done
 
-backup_delete "$WORKDIR" "$BACKUP"
 backup "$WORKDIR" "$BACKUP"
+backup_delete "$WORKDIR" "$BACKUP"
