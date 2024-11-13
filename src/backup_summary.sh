@@ -14,7 +14,6 @@ function backup() {
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
             continue;
         fi
-        echo "f "$CHECKING" "$1" "$2""
         cpprint_summary "$file" "$2/$(basename "$file")"
     done
 }
@@ -36,6 +35,7 @@ function backup_delete() {
             fi
             continue;
         fi 
+        echo "-f "$1/$(basename "$file")""
         if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
             continue;
         fi
@@ -131,6 +131,6 @@ done
 
 shopt -s nullglob
 backup "$WorkDir" "$Backup"
-#backup_delete "$WorkDir" "$Backup"
+backup_delete "$WorkDir" "$Backup"
 
 summary
