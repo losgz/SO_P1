@@ -93,7 +93,7 @@ done
 shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
-    echo "$1 not a dir"
+    echo "ERROR: "$(basename "$1")" is not a directory"
     exit 1;
 fi
 
@@ -102,17 +102,17 @@ if [[ ! -d "$2" ]]; then
 fi
 
 
-WORKDIR="$(realpath "$1")"
-BACKUP="$(realpath "$2")"
-BACKUP_PATH="$BACKUP"
+WorkDir="$(realpath "$1")"
+Backup="$(realpath "$2")"
+BackupPath="$Backup"
 
-while [[ "$BACKUP_PATH" != "/" ]]; do
-    if [[ $WORKDIR == $BACKUP_PATH ]]; then
-        echo "WORKDIR is parent"
+while [[ "$BackupPath" != "/" ]]; do
+    if [[ $WorkDir == $BackupPath ]]; then
+        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
         exit 1
     fi
-    BACKUP_PATH="$(dirname "$BACKUP_PATH")"
+    BackupPath="$(dirname "$BackupPath")"
 done
 
-backup "$WORKDIR" "$BACKUP"
-backup_delete "$WORKDIR" "$BACKUP"
+backup "$WorkDir" "$Backup"
+backup_delete "$WorkDir" "$Backup"

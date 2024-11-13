@@ -17,26 +17,30 @@ done
 shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
-    echo "$1 not a dir"
+    echo "ERROR: "$1" not a directory"
     exit 1;
 fi
-WORKDIR="$(realpath "$1")"
+WorkDir="$(realpath "$1")"
 
-BACKUP="$(realpath "$2")"
-if [[ ! -d "$BACKUP" ]]; then
-    mkdirprint "$BACKUP";
+Backup="$(realpath "$2")"
+if [[ "$Backup" == "$WorkDir" ]]; then
+    echo "ERROR: "$1" and "$2" are the same directory"
+    exit 1
 fi
-for file in "$WORKDIR"/*; do
+if [[ ! -d "$Backup" ]]; then
+    mkdirprint "$Backup";
+fi
+for file in "$WorkDir"/{*,.*}; do
     if [[ -d "$file" ]]; then
         continue;
     fi
-    cpprint "$file" "$BACKUP/$(basename "$file")"
+    cpprint "$file" "$Backup/$(basename "$file")"
 done
 
 if [[ ! -d "$2" ]]; then
-    return 0;
+    exit 0;
 fi
-for file in "$2"/*; do
+for file in "$2"/{*,.*}; do
     if [[ -f "$1/$(basename "$file")" ]]; then
         continue;
     fi

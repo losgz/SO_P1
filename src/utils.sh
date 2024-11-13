@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function mkdirprint(){
-    local simpler_name="${1#$(dirname "$BACKUP")/}"
+    local simpler_name="${1#$(dirname "$Backup")/}"
     echo "mkdir $simpler_name"
     if [[ $CHECKING -eq 0 ]]; then
         mkdir "$1";
@@ -11,12 +11,12 @@ function mkdirprint(){
 }
 
 function summary() {
-    echo "While backign $(basename "$WORKDIR"): $ERRORS ERRORS; $WARNINGS WARNINGS; $FILES_UPDATED Updated; $FILES_COPIED Copied ($SIZE_COPIED B); $FILES_DELETED Deleted ($SIZE_REMOVED B)"
+    echo "While backign $(basename "$WorkDir"): $ERRORS ERRORS; $WARNINGS WARNINGS; $FILES_UPDATED Updated; $FILES_COPIED Copied ($SIZE_COPIED B); $FILES_DELETED Deleted ($SIZE_REMOVED B)"
 }
 
 function cpprint(){
-    local simpler_name_workdir="${1#$(dirname "$WORKDIR")/}"
-    local simpler_name_backup="${2#$(dirname "$BACKUP")/}"
+    local simpler_name_workdir="${1#$(dirname "$WorkDir")/}"
+    local simpler_name_backup="${2#$(dirname "$Backup")/}"
     local FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
         local BAK_FILE_DATE=$(stat -c %Y "$2")
@@ -35,8 +35,8 @@ function cpprint(){
 
 
 function cpprint_summary(){
-    local simpler_name_workdir="${1#$(dirname "$WORKDIR")/}"
-    local simpler_name_backup="${2#$(dirname "$BACKUP")/}"
+    local simpler_name_workdir="${1#$(dirname "$WorkDir")/}"
+    local simpler_name_backup="${2#$(dirname "$Backup")/}"
     local FILE_MODE_DATE=$(stat -c %Y "$1")
     if [ -f "$2" ]; then
         local BAK_FILE_DATE=$(stat -c %Y "$2")
@@ -47,7 +47,7 @@ function cpprint_summary(){
         fi
         ((FILES_UPDATED++))
     else
-        (( SIZE_COPIED+=$(stat -c %s "$1") ))
+        ((SIZE_COPIED+=$(stat -c %s "$1") ))
         ((FILES_COPIED++))
     fi
     echo "cp -a $simpler_name_workdir $simpler_name_backup"
