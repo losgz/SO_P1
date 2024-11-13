@@ -3,56 +3,45 @@
 source ./utils.sh
 
 function backup() {
-    if [[ ! -d "$2" ]]; then
-        mkdirprint "$2";
-    fi
-    for file in "$1"/*; do
+    for file in "$1"/{*,.*}; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
+            mkdirprint "$2/$(basename "$file")";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
             continue;
         fi
-        cpprint_summary "$file" "$2/$(basename "$file")"
+        cpprint "$file" "$2/$(basename "$file")"
     done
 }
 
 function backup_delete() {
-    if [[ ! -d "$2" || ! -n "$2" ]]; then
+    if [[ ! -d "$2" ]]; then
         return 0;
     fi
-    for file in "$2"/*; do
+    for file in "$2"/{*,.*}; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
-            if [[ ! -d "$1/$(basename "$file")" ]]; then
+            if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
                 rm -rf "$file"
                 continue;
             fi
             backup_delete "$1/$(basename "$file")" "$2/$(basename "$file")"
             continue;
-        fi 
+        fi
         if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
             continue;
         fi
-        ((SIZE_REMOVED+=$(stat -c %s "$file") ))
-        ((FILES_DELETED++))
         if [[ $CHECKING -eq "0" ]]; then
             rm "$file"
         fi
     done
 }
-
-# Variables for Summary
-ERRORS="0"
-WARNINGS="0"
-FILES_UPDATED="0"
-FILES_COPIED="0"
-FILES_DELETED="0"
 
 # Variables for the opts
 CHECKING="0"
@@ -85,8 +74,6 @@ while getopts "cb:r:" opt; do
             REGEX="$OPTARG"
             check_regex "$REGEX"
             if [[ $? -eq 1 ]]; then
-                ((ERRORS++))
-                summary
                 exit 1
             fi
             ;;
@@ -104,7 +91,7 @@ done
 shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
-    echo "$1 not a dir"
+    echo "ERROR: "$(basename "$1")" is not a directory"
     exit 1;
 fi
 
@@ -113,21 +100,17 @@ if [[ ! -d "$2" ]]; then
 fi
 
 
-WORKDIR="$(realpath "$1")"
-BACKUP="$(realpath "$2")"
-BACKUP_PATH="$BACKUP"
+WorkDir="$(realpath "$1")"
+Backup="$(realpath "$2")"
+BackupPath="$Backup"
 
-while [[ "$BACKUP_PATH" != "/" ]]; do
-    if [[ $WORKDIR == $BACKUP_PATH ]]; then
-        echo "ERROR: $WORKDIR is a parent to $BACKUP"
-        ((ERRORS++))
-        summary
+while [[ "$BackupPath" != "/" ]]; do
+    if [[ $WorkDir == $BackupPath ]]; then
+        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
         exit 1
     fi
-    BACKUP_PATH="$(dirname "$BACKUP_PATH")"
+    BackupPath="$(dirname "$BackupPath")"
 done
-
-backup_delete "$WORKDIR" "$BACKUP"
-backup "$WORKDIR" "$BACKUP"
-
-summary
+shopt -s nullglob
+backup "$WorkDir" "$Backup"
+backup_delete "$WorkDir" "$Backup"
