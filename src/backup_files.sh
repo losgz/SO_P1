@@ -31,10 +31,10 @@ if [[ ! -d "$Backup" ]]; then
     mkdirprint "$Backup";
 fi
 
+# Calculate the total size of files in the source directory (in KB)
+WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+
 if [[ -d "$2" ]]; then
-  
-    # Calculate the total size of files in the source directory (in KB)
-    WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
 
     # Get available space in the destination directory (in KB)
     AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
@@ -44,18 +44,30 @@ if [[ -d "$2" ]]; then
         echo "ERROR: Not enough space in destination directory."
         exit 1
     fi
-    shopt -s nullglob
-    for file in "$2"/{*,.*}; do
-        if [[ -f "$1/$(basename "$file")" ]]; then
-            continue;
-        fi
-        if [[ $CHECKING -eq "0" ]]; then
-            rm "$file"
-        fi
-    done
+else
+
+    # Get available space in the computer (in KB)
+    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in the computer."
+        exit 1
+    fi
+
 fi
 
-for file in "$WorkDir"/{*,.*}; do
+shopt -s nullglob dotglob
+for file in "$2"/*; do
+    if [[ -f "$1/$(basename "$file")" ]]; then
+        continue;
+    fi
+    if [[ $CHECKING -eq "0" ]]; then
+        rm "$file"
+    fi
+done
+
+for file in "$WorkDir"/*; do
     if [[ -d "$file" ]]; then
         continue;
     fi

@@ -3,7 +3,7 @@
 source ./utils.sh
 
 function backup() {
-    for file in "$1"/{*,.*}; do
+    for file in "$1"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
@@ -22,7 +22,7 @@ function backup_delete() {
     if [[ ! -d "$2" ]]; then
         return 0;
     fi
-    for file in "$2"/{*,.*}; do
+    for file in "$2"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
@@ -104,6 +104,31 @@ WorkDir="$(realpath "$1")"
 Backup="$(realpath "$2")"
 BackupPath="$Backup"
 
+# Calculate the total size of files in the source directory (in KB)
+WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+
+if [[ -d "$2" ]]; then
+
+    # Get available space in the destination directory (in KB)
+    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in destination directory."
+        exit 1
+    fi
+else
+
+    # Get available space in the computer (in KB)
+    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in the computer."
+        exit 1
+    fi
+fi
+
 while [[ "$BackupPath" != "/" ]]; do
     if [[ $WorkDir == $BackupPath ]]; then
         echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
@@ -111,6 +136,6 @@ while [[ "$BackupPath" != "/" ]]; do
     fi
     BackupPath="$(dirname "$BackupPath")"
 done
-shopt -s nullglob
+shopt -s nullglob dotglob
 backup "$WorkDir" "$Backup"
 backup_delete "$WorkDir" "$Backup"
