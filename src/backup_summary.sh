@@ -3,19 +3,18 @@
 source ./utils.sh
 
 function backup() {
-    if [[ ! -d "$2" ]]; then
-        mkdirprint "$2";
-    fi
-    for file in "$1"/*; do
+    for file in "$1"/{*,.*}; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
+            mkdirprint "$2/$(basename "$file")";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
             continue;
         fi
+        echo "f "$CHECKING" "$1" "$2""
         cpprint_summary "$file" "$2/$(basename "$file")"
     done
 }
@@ -24,7 +23,7 @@ function backup_delete() {
     if [[ ! -d "$2" || ! -n "$2" ]]; then
         return 0;
     fi
-    for file in "$2"/*; do
+    for file in "$2"/{*,.*}; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
@@ -116,12 +115,12 @@ if [[ ! -d "$2" ]]; then
 fi
 
 
-Work="$(realpath "$1")"
+WorkDir="$(realpath "$1")"
 Backup="$(realpath "$2")"
 BackupPath="$Backup"
 
 while [[ "$BackupPath" != "/" ]]; do
-    if [[ $Work == $BackupPath ]]; then
+    if [[ $WorkDir == $BackupPath ]]; then
         echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
         ((ERRORS++))
         summary
@@ -130,7 +129,8 @@ while [[ "$BackupPath" != "/" ]]; do
     BackupPath="$(dirname "$BackupPath")"
 done
 
-backup "$Work" "$Backup"
-backup_delete "$Work" "$Backup"
+shopt -s nullglob
+backup "$WorkDir" "$Backup"
+#backup_delete "$WorkDir" "$Backup"
 
 summary

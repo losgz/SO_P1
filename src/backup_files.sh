@@ -30,6 +30,31 @@ fi
 if [[ ! -d "$Backup" ]]; then
     mkdirprint "$Backup";
 fi
+
+if [[ -d "$2" ]]; then
+  
+    # Calculate the total size of files in the source directory (in KB)
+    WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+
+    # Get available space in the destination directory (in KB)
+    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in destination directory."
+        exit 1
+    fi
+    shopt -s nullglob
+    for file in "$2"/{*,.*}; do
+        if [[ -f "$1/$(basename "$file")" ]]; then
+            continue;
+        fi
+        if [[ $CHECKING -eq "0" ]]; then
+            rm "$file"
+        fi
+    done
+fi
+
 for file in "$WorkDir"/{*,.*}; do
     if [[ -d "$file" ]]; then
         continue;
@@ -37,14 +62,3 @@ for file in "$WorkDir"/{*,.*}; do
     cpprint "$file" "$Backup/$(basename "$file")"
 done
 
-if [[ ! -d "$2" ]]; then
-    exit 0;
-fi
-for file in "$2"/{*,.*}; do
-    if [[ -f "$1/$(basename "$file")" ]]; then
-        continue;
-    fi
-    if [[ $CHECKING -eq "0" ]]; then
-        rm "$file"
-    fi
-done

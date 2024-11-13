@@ -2,7 +2,7 @@
 
 function mkdirprint(){
     local simpler_name="${1#$(dirname "$Backup")/}"
-    echo "mkdir $simpler_name"
+    echo "mkdir "$simpler_name""
     if [[ $CHECKING -eq 0 ]]; then
         mkdir "$1";
         return $?;
