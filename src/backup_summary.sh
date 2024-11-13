@@ -53,7 +53,7 @@ function new_backup() {
     if [[ ! -d "$2" ]]; then
         return 0;
     fi
-    
+
     for file in "$2"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
@@ -73,6 +73,8 @@ function new_backup() {
             rm "$file"
         fi
     done
+
+    summary "$1" "$ERR"
 }
 
 
