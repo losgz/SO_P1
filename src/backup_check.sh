@@ -6,9 +6,7 @@ function check_content() {
             check_content "$file" "$2/$(basename  "$file")"
         fi
         local basename=$(basename "$file")
-        #My guy pelo que percebi ele só tem de dizer se os ficheiros com o mesmo nome são diferentes 
         if [[ ! -f "$2"/"$basename" ]];then 
-            #echo "$2/$basename doesn't exist"
             continue
         fi
         local original_hash=$(md5sum "$file" | awk '{ print $1 }')
