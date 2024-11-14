@@ -15,7 +15,7 @@ function mkdirprint(){
 
 function summary() {
     local simpler_name="${1#$(dirname "$WorkDir")/}"
-    echo -e "While backing $(basename "$simpler_name"): $2 ERRORS; $3 WARNINGS; $4 Updated; $5 Copied (${6}B); $7 Deleted (${8}B)\n"
+    echo -e "While backign $(basename "$simpler_name"): $2 ERRORS; $3 WARNINGS; $4 Updated; $5 Copied (${6}B); $7 Deleted (${8}B)\n"
 }
 
 function cpprint(){

@@ -2,80 +2,45 @@
 
 source ./utils.sh
 
-function new_backup() {
-    # Variables for Summary
-    local ERRORS="0"
-    local WARNINGS="0"
-    local FILES_UPDATED="0"
-    local FILES_COPIED="0"
-    local FILES_DELETED="0"
-    local SIZE_COPIED="0"
-    local SIZE_REMOVED="0"
+function backup() {
     for file in "$1"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
             mkdirprint "$2/$(basename "$file")";
-            new_backup "$file" "$2/$(basename "$file")"
+            backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
             continue;
         fi
-        #cpprint_summary "$file" "$2/$(basename "$file")"
-        local file_copy="$2/$(basename "$file")"
-        local simpler_name_workdir="${file#$(dirname "$WorkDir")/}"
-        local simpler_name_backup="${file_copy#$(dirname "$Backup")/}"
-        local FILE_MODE_DATE=$(stat -c %Y "$file")
-        if [ -f "$file_copy" ]; then
-            local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
-            if [[ "$FILE_MODE_DATE" -le "$BAK_FILE_DATE" ]]; then
-                echo "WARNING: backup entry $simpler_name_backup is newer than $simpler_name_workdir; Should not happen"
-                ((WARNINGS++))
-                continue;
-            fi
-            ((FILES_UPDATED++))
-        else
-            ((FILES_COPIED++))
-            ((SIZE_COPIED+=$(stat -c %s "$file")))
-        fi
-        echo "cp -a $simpler_name_workdir $simpler_name_backup"
-        if [[ $CHECKING -eq 0 ]]; then
-            cp -a "$file" "$file_copy";
-        fi
+        cpprint "$file" "$2/$(basename "$file")"
     done
+}
+
+function backup_delete() {
     if [[ ! -d "$2" ]]; then
-        summary "$1" "$ERRORS" "$WARNINGS" "$FILES_UPDATED" "$FILES_COPIED" "$SIZE_COPIED" "$FILES_DELETED" "$SIZE_REMOVED"
         return 0;
     fi
-
     for file in "$2"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
-            echo "$file"
-            echo "$1/$(basename "$file")"
             if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
-                local directory_size=$(du -sk "$file" | awk '{print $1}')
-                ((SIZE_REMOVED+=$directory_size))
-                local file_count=$(find "$file" -type f | wc -l)
-                ((FILES_DELETED+=$file_count))
                 rm -rf "$file"
+                continue;
             fi
-            continue;
-        fi 
-        if [[ -f "$1/$(basename "$file")" ]]; then
+            backup_delete "$1/$(basename "$file")" "$2/$(basename "$file")"
             continue;
         fi
-        ((SIZE_REMOVED+=$(stat -c %s "$file") ))
-        ((FILES_DELETED++))
+        if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
+            continue;
+        fi
         if [[ $CHECKING -eq "0" ]]; then
             rm "$file"
         fi
     done
-
-    summary "$1" "$ERRORS" "$WARNINGS" "$FILES_UPDATED" "$FILES_COPIED" "$SIZE_COPIED" "$FILES_DELETED" "$SIZE_REMOVED"
 }
 
 # Variables for the opts
@@ -83,6 +48,8 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
+SIZE_COPIED="0"
+SIZE_REMOVED="0"
 
 while getopts "cb:r:" opt; do
     case $opt in
@@ -107,7 +74,6 @@ while getopts "cb:r:" opt; do
             REGEX="$OPTARG"
             check_regex "$REGEX"
             if [[ $? -eq 1 ]]; then
-                summary "$1" "1" "0" "0" "0" "0" "0" "0"
                 exit 1
             fi
             ;;
@@ -126,12 +92,12 @@ shift $((OPTIND - 1))
 
 if [[ ! -d "$1" ]]; then
     echo "ERROR: "$(basename "$1")" is not a directory"
-    ((ERRORS++))
-    summary
     exit 1;
 fi
 
-mkdirprint "$2";
+if [[ ! -d "$2" ]]; then
+    mkdirprint "$2";
+fi
 
 
 WorkDir="$(realpath "$1")"
@@ -166,14 +132,10 @@ fi
 while [[ "$BackupPath" != "/" ]]; do
     if [[ $WorkDir == $BackupPath ]]; then
         echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
-        ((ERRORS++))
-        summary
         exit 1
     fi
     BackupPath="$(dirname "$BackupPath")"
 done
-
 shopt -s nullglob dotglob
-new_backup "$WorkDir" "$Backup"
-echo $file_count
-exit 0
+backup "$WorkDir" "$Backup"
+backup_delete "$WorkDir" "$Backup"

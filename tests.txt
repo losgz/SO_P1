@@ -7,8 +7,8 @@ return 1 quando é warning
 É para testar merdas no checking?
 
 To do:
-Cena do espaço (Tá feito no files)
-Check summary está a apagar tudo (ooopsie) Deixa tratar please!!
-
+Testar a cena do espaço (fiz mas não testei)
+Mudei o mkdir não é preciso testar mais
+Corrigir summary
 
 use overleaf?
