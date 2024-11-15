@@ -16,7 +16,7 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            mkdirprint "$2/$(basename "$file")";
+            mkdirprint "$2/$(basename "$file")" "$Backup";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
@@ -36,9 +36,10 @@ function backup() {
                 continue;
             fi
             ((FILES_UPDATED++))
+        else
+            ((FILES_COPIED++))
+            ((SIZE_COPIED+=$(stat -c %s "$file")))
         fi
-        ((FILES_COPIED++))
-        ((SIZE_COPIED+=$(stat -c %s "$file")))
         echo "cp -a "$simpler_name_workdir" "$simpler_name_backup""
         if [[ $CHECKING -eq 0 ]]; then
             cp -a "$file" "$file_copy";
@@ -83,6 +84,8 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
+WorkDir=""
+Backup=""
 
 OPTERR=0 
 while getopts "cb:r:" opt; do

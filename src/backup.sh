@@ -48,8 +48,8 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
-SIZE_COPIED="0"
-SIZE_REMOVED="0"
+WorkDir=""
+Backup=""
 
 OPTERR=0
 while getopts "cb:r:" opt; do

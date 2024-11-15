@@ -4,3 +4,4 @@ backup.sh
 chaliça/
 ~/AED/aula04/
 ~/SO/projeto1/src/backup w.txt
+s

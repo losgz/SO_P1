@@ -3,7 +3,9 @@
 source ./utils.sh
 
 #Variável usada para se verificar se a opção de checking foi selecionada
-CHECKING="0" 
+CHECKING="0"
+WorkDir=""
+Backup="" 
 
 #Verificação das opções selecionadas
 OPTERR=0 
