@@ -121,7 +121,7 @@ while getopts "cb:r:" opt; do
 done
 
 shift $((OPTIND - 1))
-if [[ ! $# -eq 2 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "ERROR: Not enough arguments"
     summary "$1" "1" "0" "0" "0" "0" "0" "0"
     exit 1

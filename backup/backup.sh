@@ -3,14 +3,12 @@
 source ./utils.sh
 
 function backup() {
-    if [[ ! -d "$2" ]]; then
-        mkdirprint "$2";
-    fi
     for file in "$1"/*; do
         if is_in_list "$file" "${DIRS[@]}" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
+            mkdirprint "$2/$(basename "$file")" "$Backup";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
@@ -21,7 +19,7 @@ function backup() {
 }
 
 function backup_delete() {
-    if [[ ! -d "$2" || ! -n "$2" ]]; then
+    if [[ ! -d "$2" ]]; then
         return 0;
     fi
     for file in "$2"/*; do
@@ -29,7 +27,7 @@ function backup_delete() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            if [[ ! -d "$1/$(basename "$file")" ]]; then
+            if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
                 rm -rf "$file"
                 continue;
             fi
@@ -53,6 +51,7 @@ DIRS=()
 SIZE_COPIED="0"
 SIZE_REMOVED="0"
 
+OPTERR=0
 while getopts "cb:r:" opt; do
     case $opt in
         c)
@@ -80,7 +79,7 @@ while getopts "cb:r:" opt; do
             fi
             ;;
         \?)
-            echo "Invalid option: -$OPTARG"
+            echo "ERROR: Invalid option selected"
             exit 1
             ;;
         :)
@@ -92,27 +91,53 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ ! -d "$1" ]]; then
-    echo "$1 not a dir"
+if [[ $# -lt 2 ]]; then
+    echo "ERROR: Not enough arguments"
+    exit 1
+elif [[ ! -d "$1" ]]; then
+    echo "ERROR: "$(basename "$1")" is not a directory"
     exit 1;
 fi
 
-if [[ ! -d "$2" ]]; then
-    mkdirprint "$2";
-fi
+mkdirprint "$2" "$2";
 
 
-WORKDIR="$(realpath "$1")"
-BACKUP="$(realpath "$2")"
-BACKUP_PATH="$BACKUP"
+WorkDir="$(realpath "$1")"
+Backup="$(realpath "$2")"
+BackupPath="$Backup"
 
-while [[ "$BACKUP_PATH" != "/" ]]; do
-    if [[ $WORKDIR == $BACKUP_PATH ]]; then
-        echo "WORKDIR is parent"
+# Calculate the total size of files in the source directory (in KB)
+WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+
+if [[ -d "$2" ]]; then
+
+    # Get available space in the destination directory (in KB)
+    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in destination directory."
         exit 1
     fi
-    BACKUP_PATH="$(dirname "$BACKUP_PATH")"
-done
+else
 
-backup_delete "$WORKDIR" "$BACKUP"
-backup "$WORKDIR" "$BACKUP"
+    # Get available space in the computer (in KB)
+    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
+
+    # Check if there's enough space in the destination directory
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in the computer."
+        exit 1
+    fi
+fi
+
+while [[ "$BackupPath" != "/" ]]; do
+    if [[ $WorkDir == $BackupPath ]]; then
+        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
+        exit 1
+    fi
+    BackupPath="$(dirname "$BackupPath")"
+done
+shopt -s nullglob dotglob
+backup "$WorkDir" "$Backup"
+backup_delete "$WorkDir" "$Backup"

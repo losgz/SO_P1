@@ -110,8 +110,7 @@ while getopts "cb:r:" opt; do
             fi
             ;;
         \?)
-            invalid_opt="${OPTARG:-$1}"
-            echo "ERROR: Invalid option: $invalid_opt"
+            echo "ERROR: Invalid option selected"
             REGEX="(a"
             ;;
         :)
@@ -122,7 +121,7 @@ while getopts "cb:r:" opt; do
 done
 
 shift $((OPTIND - 1))
-if [[ ! $# -ge 2 ]]; then
+if [[ $# -lt 2 ]]; then
     echo "ERROR: Not enough arguments"
     summary "$1" "1" "0" "0" "0" "0" "0" "0"
     exit 1
