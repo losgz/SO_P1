@@ -4,7 +4,7 @@ source ./utils.sh
 
 function backup() {
     for file in "$1"/*; do
-        if is_in_list "$file" "${DIRS[@]}" ; then
+        if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -23,7 +23,7 @@ function backup_delete() {
         return 0;
     fi
     for file in "$2"/*; do
-        if is_in_list "$file" "${DIRS[@]}" ; then
+        if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -138,6 +138,12 @@ while [[ "$BackupPath" != "/" ]]; do
     fi
     BackupPath="$(dirname "$BackupPath")"
 done
+
+declare -A DIRS_SET
+for dir in "${DIRS[@]}"; do
+    DIRS_SET["$(realpath "$dir")"]=1
+done
+
 shopt -s nullglob dotglob
 backup "$WorkDir" "$Backup"
 backup_delete "$WorkDir" "$Backup"

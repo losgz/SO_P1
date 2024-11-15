@@ -179,6 +179,11 @@ while [[ "$BackupPath" != "/" ]]; do
     BackupPath="$(dirname "$BackupPath")"
 done
 
+declare -A DIRS_SET
+for dir in "${DIRS[@]}"; do
+    DIRS_SET["$(realpath "$dir")"]=1
+done
+
 shopt -s nullglob dotglob
 backup "$WorkDir" "$Backup"
 echo $file_count

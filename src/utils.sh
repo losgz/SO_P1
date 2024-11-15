@@ -40,15 +40,8 @@ function cpprint(){
 }
 
 function is_in_list(){
-    local arg="$(realpath "$1")"
-    shift
-    local list=("$@")
-    for item in "${list[@]}"; do
-        if [[ $(realpath "$(eval echo "$item")") == $arg ]]; then
-            return 0;
-        fi
-    done
-    return 1;
+    local real_arg="$(realpath "$1")"
+    [[ -n "${DIRS_SET[$real_arg]}" ]]
 }
 
 function check_regex() {
