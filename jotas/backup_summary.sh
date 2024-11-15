@@ -54,12 +54,14 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
-                local directory_size=$(du -sk "$file" | awk '{print $1}')
+            if [[ ! -d "$1/$(basename "$file")" ]]; then
+                local directory_size=$(( $(du -sk "$file" | awk '{print $1}') * 1024 ))
                 ((SIZE_REMOVED+=$directory_size))
                 local file_count=$(find "$file" -type f | wc -l)
                 ((FILES_DELETED+=$file_count))
-                rm -rf "$file"
+                if [[ $CHECKING -eq "0" ]]; then
+                    rm -rf "$file"
+                fi
             fi
             continue;
         fi 

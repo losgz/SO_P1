@@ -27,11 +27,11 @@ function backup_delete() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            if [[ ! -d "$1/$(basename "$file")" && $CHECKING -eq "0" ]]; then
-                rm -rf "$file"
-                continue;
+            if [[ ! -d "$1/$(basename "$file")" ]]; then
+                if [[ $CHECKING -eq "0" ]]; then
+                    rm -rf "$file"
+                fi
             fi
-            backup_delete "$1/$(basename "$file")" "$2/$(basename "$file")"
             continue;
         fi
         if [[ ! -f "$file" || -f "$1/$(basename "$file")" ]]; then
