@@ -2,9 +2,10 @@
 
 source ./utils.sh
 
+#Variável usada para se verificar se a opção de checking foi selecionada
+CHECKING="0" 
 
-CHECKING="0" #Variável usada para se verificar se a opção de checking foi selecionada
-
+#Verificação das opções selecionadas
 OPTERR=0 
 while getopts "c" opt; do
     case $opt in
@@ -12,16 +13,17 @@ while getopts "c" opt; do
             CHECKING="1"
             ;;
         \?)
-            invalid_opt="${OPTARG:-$1}"  # if OPTARG is empty, use $1 as the option
-            echo "ERROR: Invalid option: $invalid_opt"
+            echo "ERROR: Invalid option selected"
             exit 1
             ;;
     esac
 done
 
+# Move a posição dos parâmetros da linha de comando após o uso do getopts
 shift $((OPTIND - 1))
 
-if [[ ! $# -eq 2 ]]; then
+
+if [[ ! $# -ge 2 ]]; then
     echo "ERROR: Not enough arguments"
     exit 1
 elif [[ ! -d "$1" ]]; then

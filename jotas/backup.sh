@@ -92,7 +92,7 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ ! $# -eq 2 ]]; then
+if [[ ! $# -ge 2 ]]; then
     echo "ERROR: Not enough arguments"
     exit 1
 elif [[ ! -d "$1" ]]; then
