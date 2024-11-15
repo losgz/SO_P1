@@ -79,8 +79,7 @@ while getopts "cb:r:" opt; do
             fi
             ;;
         \?)
-            invalid_opt="${OPTARG:-$1}"
-            echo "ERROR: Invalid option: $invalid_opt"
+            echo "ERROR: Invalid option selected"
             exit 1
             ;;
         :)
