@@ -5,10 +5,20 @@ Quando as diretorias são pai e filho criamos a pasta?
 Se já tivermos os ficheiros na pasta backup mas agora estão no ignore.txt é para apagar ou mexer?
 return 1 quando é warning
 É para testar merdas no checking?
+É para printar quando as datas são iguais
 
 To do:
 Testar a cena do espaço (fiz mas não testei)
-Mudei o mkdir não é preciso testar mais
-Corrigir summary
+Fazer com que ele vá primeiro para dentro das pastas e só depois para os ficheiros
+
+
+Mudanças:
+Olha agora não dá warning se as datas forem iguais, no do stor dá a entender que é assim
+makeDir tem 2 argumentos
+Dar update também acrescenta
+
+
+
+
 
 use overleaf?
