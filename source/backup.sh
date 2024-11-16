@@ -71,6 +71,7 @@ while getopts ":cb:r:" opt; do
             if [[ ! -f $DIRS_FILE || ! -r $DIRS_FILE ]]; then
                 echo "$DIRS_FILE isn't a valid file"
                 DIRS_FILE=""
+                exit 1
             fi
             lines=()
             mapfile -t lines < "$DIRS_FILE"
@@ -100,8 +101,8 @@ done
 
 shift $((OPTIND - 1))
 
-if [[ $# -lt 2 ]]; then
-    echo "ERROR: Not enough arguments"
+if [[ ! $# -eq 2 ]]; then
+    echo "ERROR: The function has two arguments"
     exit 1
 elif [[ ! -d "$1" ]]; then
     echo "ERROR: "$(basename "$1")" is not a directory"

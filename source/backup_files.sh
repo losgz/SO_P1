@@ -23,8 +23,8 @@ done
 shift $((OPTIND - 1))
 
 
-if [[ $# -lt 2 ]]; then
-    echo "ERROR: Not enough arguments"
+if [[ ! $# -eq 2 ]]; then
+    echo "ERROR: The function has two arguments"
     exit 1
 elif [[ ! -d "$1" ]]; then
     echo "ERROR: "$1" not a directory"

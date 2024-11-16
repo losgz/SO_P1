@@ -145,12 +145,8 @@ while getopts ":cb:r:" opt; do
 done
 
 shift $((OPTIND - 1))
-if [[ $# -lt 2 ]]; then
-    echo "ERROR: Not enough arguments"
-    ((ARG_ERRORS++))
-    summary "$1" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
-    exit 1
-elif [[ ! -d "$1" ]]; then
+
+if [[ ! -d "$1" ]]; then
     ((ARG_ERRORS++))
     echo "ERROR: "$(basename "$1")" is not a directory"
     summary "$1" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
@@ -158,6 +154,11 @@ elif [[ ! -d "$1" ]]; then
 fi
 
 WORKDIR="$(realpath "$1")"
+
+if [[ ! $# -eq 2 ]]; then
+    echo "ERROR: The function has two arguments"
+    ((ARG_ERRORS++))
+fi
 if [[ ! $ARG_ERRORS -eq 0 ]]; then
     summary "$WORKDIR" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
     exit 1
