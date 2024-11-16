@@ -12,6 +12,11 @@ function backup() {
     local SIZE_COPIED="0"
     local SIZE_REMOVED="0"
     for file in "$1"/*; do
+        if [ ! -r "$file" ]; then
+            echo "ERROR: "$simpler_name_workdir" doenst have permission to read"
+            ((ERRORS++))
+            continue;
+        fi
         if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
@@ -25,11 +30,6 @@ function backup() {
         local file_copy="$2/$(basename "$file")"
         local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
         local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
-        if [ ! -r "$file" ]; then
-            echo "ERROR: "$simpler_name_workdir" doenst have permission to read"
-            ((ERRORS++))
-            continue;
-        fi
         if [ -f "$file_copy" ]; then
             if [ ! -w "$file_copy" ]; then
                 echo "ERROR: "$simpler_name_backup" doenst have permission to read"
@@ -183,28 +183,18 @@ fi
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
-if [[ -d "$2" ]]; then
+directoryThatNeedsToBeChecked="$BACKUP"
+if [[ ! -d "$2" ]]; then
+    directoryThatNeedsToBeChecked="$(dirname "$BackupPath")" 
+fi
 
-    # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
+# Get available space in the destination directory (in KB)
+AvailableSpace=$(df -k "$directoryThatNeedsToBeChecked" | awk 'NR==2 {print $4}')
 
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in destination directory."
-        summary "$(basename "$WORKDIR")" "1" "0" "0" "0" "0" "0" "0"
-        exit 1
-    fi
-else
-
-    # Get available space in the computer (in KB)
-    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
-
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in the computer."
-        summary "$(basename "$WORKDIR")" "1" "0" "0" "0" "0" "0" "0"
-        exit 1
-    fi
+# Check if there's enough space in the destination directory
+if (( AvailableSpace < WorkDirSize )); then
+    echo "ERROR: Not enough space in destination directory."
+    exit 1
 fi
 
 while [[ "$BackupPath" != "/" ]]; do

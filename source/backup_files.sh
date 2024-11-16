@@ -53,27 +53,18 @@ fi
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
-if [[ -d "$2" ]]; then
+directoryThatNeedsToBeChecked="$BACKUP"
+if [[ ! -d "$2" ]]; then
+    directoryThatNeedsToBeChecked="$(dirname "$BackupPath")" 
+fi
 
-    # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
+# Get available space in the destination directory (in KB)
+AvailableSpace=$(df -k "$directoryThatNeedsToBeChecked" | awk 'NR==2 {print $4}')
 
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in destination directory."
-        exit 1
-    fi
-else
-
-    # Get available space in the computer (in KB)
-    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
-
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in the computer."
-        exit 1
-    fi
-
+# Check if there's enough space in the destination directory
+if (( AvailableSpace < WorkDirSize )); then
+    echo "ERROR: Not enough space in destination directory."
+    exit 1
 fi
 
 shopt -s nullglob dotglob
