@@ -96,6 +96,7 @@ REGEX=""
 DIRS=()
 WORKDIR=""
 BACKUP=""
+ARG_ERRORS="0"
 declare -A DIRS_SET
 
 while getopts ":cb:r:" opt; do
@@ -106,8 +107,10 @@ while getopts ":cb:r:" opt; do
         b)
             DIRS_FILE="$OPTARG"
             if [[ ! -f $DIRS_FILE || ! -r $DIRS_FILE ]]; then
-                echo "$DIRS_FILE isn't a valid file"
+                echo "ERROR: $DIRS_FILE isn't a valid file"
                 DIRS_FILE=""
+                ((ARG_ERRORS++))
+                continue
             fi
             lines=()
             mapfile -t lines < "$DIRS_FILE"
@@ -121,16 +124,16 @@ while getopts ":cb:r:" opt; do
             REGEX="$OPTARG"
             check_regex "$REGEX"
             if [[ $? -eq 1 ]]; then
-                REGEX="(a"
+                ((ARG_ERRORS++))
             fi
             ;;
         \?)
             echo "ERROR: -$OPTARG is an invalid option"
-            REGEX="(a"
+            ((ARG_ERRORS++))
             ;;
         :)
             echo "ERROR: Option -$OPTARG requires an argument."
-            REGEX="(a"
+            ((ARG_ERRORS++))
             ;;
     esac
 done
@@ -138,17 +141,19 @@ done
 shift $((OPTIND - 1))
 if [[ $# -lt 2 ]]; then
     echo "ERROR: Not enough arguments"
-    summary "$1" "1" "0" "0" "0" "0" "0" "0"
+    ((ARG_ERRORS++))
+    summary "$1" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
     exit 1
 elif [[ ! -d "$1" ]]; then
+    ((ARG_ERRORS++))
     echo "ERROR: "$(basename "$1")" is not a directory"
-    summary "$1" "1" "0" "0" "0" "0" "0" "0"
+    summary "$1" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
     exit 1;
 fi
 
 WORKDIR="$(realpath "$1")"
-if [[ "$REGEX" == "(a" ]]; then
-    summary "$WORKDIR" "1" "0" "0" "0" "0" "0" "0"
+if [[ ! $ARG_ERRORS -eq 0 ]]; then
+    summary "$WORKDIR" "$ARG_ERRORS" "0" "0" "0" "0" "0" "0"
     exit 1
 fi
 
@@ -157,6 +162,16 @@ mkdirprint "$2" "$2";
 
 BACKUP="$(realpath "$2")"
 BackupPath="$BACKUP"
+
+if [[ ! -r "$1" ]]; then
+    echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+    exit 1
+fi
+
+if [[ ! -w "$2" ]]; then
+    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    exit 1
+fi
 
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')

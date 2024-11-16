@@ -3,6 +3,10 @@
 source ./utils.sh
 
 function backup() {
+    if [[ ! -r "$1" ]]; then
+        echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+        return 0
+    fi
     for file in "$1"/*; do
         if is_in_list "$file" "$DIRS_SET" ; then
             continue;
@@ -22,6 +26,10 @@ function backup() {
 function backup_delete() {
     if [[ ! -d "$2" ]]; then
         return 0;
+    fi
+    if [[ ! -w "$2" ]]; then
+        echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+        return 0
     fi
     for file in "$2"/*; do
         if is_in_list "$file" "$DIRS_SET" ; then
@@ -106,6 +114,16 @@ mkdirprint "$2" "$2";
 WORKDIR="$(realpath "$1")"
 BACKUP="$(realpath "$2")"
 BackupPath="$BACKUP"
+
+if [[ ! -r "$1" ]]; then
+    echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+    exit 1
+fi
+
+if [[ ! -w "$2" ]]; then
+    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    exit 1
+fi
 
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
