@@ -21,7 +21,15 @@ function summary() {
 function cpprint(){
     local simpler_name_workdir="${1#$(dirname "$WORKDIR")/}"
     local simpler_name_backup="${2#$(dirname "$BACKUP")/}"
+    if [ ! -r "$1" ]; then
+        echo "ERROR: "$simpler_name_workdir" doenst have permission to read"
+        return 1
+    fi
     if [ -f "$2" ]; then
+        if [ ! -w "$2" ]; then
+            echo "ERROR: "$simpler_name_backup" doenst have permission to write"
+            return 1
+        fi
         local FILE_MODE_DATE=$(stat -c %Y "$1")
         local BAK_FILE_DATE=$(stat -c %Y "$2")
         if [[ "$FILE_MODE_DATE" -lt "$BAK_FILE_DATE" ]]; then

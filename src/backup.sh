@@ -51,6 +51,7 @@ REGEX=""
 DIRS=()
 WORKDIR=""
 BACKUP=""
+declare -A DIRS_SET
 
 while getopts ":cb:r:" opt; do
     case $opt in
@@ -139,7 +140,6 @@ while [[ "$BackupPath" != "/" ]]; do
     BackupPath="$(dirname "$BackupPath")"
 done
 
-declare -A DIRS_SET
 for dir in "${DIRS[@]}"; do
     DIRS_SET["$(realpath "$dir")"]=1
 done

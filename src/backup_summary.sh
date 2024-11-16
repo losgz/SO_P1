@@ -12,7 +12,7 @@ function backup() {
     local SIZE_COPIED="0"
     local SIZE_REMOVED="0"
     for file in "$1"/*; do
-        if is_in_list "$file" "${DIRS[@]}" ; then
+        if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -25,8 +25,18 @@ function backup() {
         local file_copy="$2/$(basename "$file")"
         local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
         local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
-        local FILE_MODE_DATE=$(stat -c %Y "$file")
+        if [ ! -r "$file" ]; then
+            echo "ERROR: "$simpler_name_workdir" doenst have permission to read"
+            ((ERRORS++))
+            continue;
+        fi
         if [ -f "$file_copy" ]; then
+            if [ ! -w "$file_copy" ]; then
+                echo "ERROR: "$simpler_name_backup" doenst have permission to read"
+                ((ERRORS++))
+                continue;
+            fi
+            local FILE_MODE_DATE=$(stat -c %Y "$file")
             local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
             if [[ "$FILE_MODE_DATE" -lt "$BAK_FILE_DATE" ]]; then
                 echo "WARNING: backup entry $simpler_name_backup is newer than $simpler_name_workdir; Should not happen"
@@ -51,7 +61,7 @@ function backup() {
     fi
 
     for file in "$2"/*; do
-        if is_in_list "$file" "${DIRS[@]}" ; then
+        if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -86,6 +96,7 @@ REGEX=""
 DIRS=()
 WORKDIR=""
 BACKUP=""
+declare -A DIRS_SET
 
 while getopts ":cb:r:" opt; do
     case $opt in
@@ -183,7 +194,6 @@ while [[ "$BackupPath" != "/" ]]; do
     BackupPath="$(dirname "$BackupPath")"
 done
 
-declare -A DIRS_SET
 for dir in "${DIRS[@]}"; do
     DIRS_SET["$(realpath "$dir")"]=1
 done
