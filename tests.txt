@@ -8,17 +8,11 @@ return 1 quando é warning
 É para printar quando as datas são iguais
 
 To do:
-Testar a cena do espaço (fiz mas não testei)
-Fazer com que ele vá primeiro para dentro das pastas e só depois para os ficheiros
+Testar a cena do espaço (fiz mas não testei), no checking elaborar
+backup delete é capaz de não estar a funcionar
 
 
 Mudanças:
 Olha agora não dá warning se as datas forem iguais, no do stor dá a entender que é assim
 makeDir tem 2 argumentos
-Dar update também acrescenta
 
-
-
-
-
-use overleaf?
