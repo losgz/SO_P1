@@ -50,7 +50,7 @@ if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
     exit 1
 fi
 
-# Calculate the total size of files in the source directory (in KB)
+# Calcula o espaço total de todos os ficheiros no diretório de trabalho (em KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
 directoryThatNeedsToBeChecked="$BACKUP"
@@ -58,7 +58,7 @@ if [[ ! -d "$2" ]]; then
     directoryThatNeedsToBeChecked="$(dirname "$BackupPath")" 
 fi
 
-# Get available space in the destination directory (in KB)
+# Calcula o espaço disponível para se fazer a cópia (em KB)
 AvailableSpace=$(df -k "$directoryThatNeedsToBeChecked" | awk 'NR==2 {print $4}')
 
 # Check if there's enough space in the destination directory
