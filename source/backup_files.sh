@@ -61,7 +61,6 @@ fi
 # Calcula o espaço disponível para se fazer a cópia (em KB)
 AvailableSpace=$(df -k "$directoryThatNeedsToBeChecked" | awk 'NR==2 {print $4}')
 
-# Check if there's enough space in the destination directory
 if (( AvailableSpace < WorkDirSize )); then
     echo "ERROR: Not enough space in destination directory."
     exit 1
