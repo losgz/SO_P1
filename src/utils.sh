@@ -14,13 +14,13 @@ function mkdirprint(){
 }
 
 function summary() {
-    local simpler_name="${1#$(dirname "$WorkDir")/}"
+    local simpler_name="${1#$(dirname "$WORKDIR")/}"
     echo -e "While backing $(basename "$simpler_name"): $2 ERRORS; $3 WARNINGS; $4 Updated; $5 Copied (${6}B); $7 Deleted (${8}B)\n"
 }
 
 function cpprint(){
-    local simpler_name_workdir="${1#$(dirname "$WorkDir")/}"
-    local simpler_name_backup="${2#$(dirname "$Backup")/}"
+    local simpler_name_workdir="${1#$(dirname "$WORKDIR")/}"
+    local simpler_name_backup="${2#$(dirname "$BACKUP")/}"
     if [ -f "$2" ]; then
         local FILE_MODE_DATE=$(stat -c %Y "$1")
         local BAK_FILE_DATE=$(stat -c %Y "$2")

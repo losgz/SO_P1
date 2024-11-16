@@ -8,7 +8,7 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            mkdirprint "$2/$(basename "$file")" "$Backup";
+            mkdirprint "$2/$(basename "$file")" "$BACKUP";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
@@ -48,11 +48,10 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
-WorkDir=""
-Backup=""
+WORKDIR=""
+BACKUP=""
 
-OPTERR=0
-while getopts "cb:r:" opt; do
+while getopts ":cb:r:" opt; do
     case $opt in
         c)
             CHECKING="1"
@@ -79,7 +78,7 @@ while getopts "cb:r:" opt; do
             fi
             ;;
         \?)
-            echo "ERROR: Invalid option selected"
+            echo "ERROR: -$OPTARG is an invalid option"
             exit 1
             ;;
         :)
@@ -102,17 +101,17 @@ fi
 mkdirprint "$2" "$2";
 
 
-WorkDir="$(realpath "$1")"
-Backup="$(realpath "$2")"
-BackupPath="$Backup"
+WORKDIR="$(realpath "$1")"
+BACKUP="$(realpath "$2")"
+BackupPath="$BACKUP"
 
 # Calculate the total size of files in the source directory (in KB)
-WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
 if [[ -d "$2" ]]; then
 
     # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
 
     # Check if there's enough space in the destination directory
     if (( AvailableSpace < WorkDirSize )); then
@@ -132,8 +131,8 @@ else
 fi
 
 while [[ "$BackupPath" != "/" ]]; do
-    if [[ $WorkDir == $BackupPath ]]; then
-        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
+    if [[ $WORKDIR == $BackupPath ]]; then
+        echo "ERROR: "$(basename "$WORKDIR")" is parent of "$(basename "$BACKUP")""
         exit 1
     fi
     BackupPath="$(dirname "$BackupPath")"
@@ -145,5 +144,5 @@ for dir in "${DIRS[@]}"; do
 done
 
 shopt -s nullglob dotglob
-backup "$WorkDir" "$Backup"
-backup_delete "$WorkDir" "$Backup"
+backup "$WORKDIR" "$BACKUP"
+backup_delete "$WORKDIR" "$BACKUP"

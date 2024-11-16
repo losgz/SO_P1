@@ -8,7 +8,7 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            mkdirprint "$2/$(basename "$file")" "$Backup";
+            mkdirprint "$2/$(basename "$file")" "$BACKUP";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
@@ -48,8 +48,8 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
-SIZE_COPIED="0"
-SIZE_REMOVED="0"
+WorkDir=""
+BACKUP=""
 
 OPTERR=0
 while getopts "cb:r:" opt; do
@@ -103,8 +103,8 @@ mkdirprint "$2" "$2";
 
 
 WorkDir="$(realpath "$1")"
-Backup="$(realpath "$2")"
-BackupPath="$Backup"
+BACKUP="$(realpath "$2")"
+BackupPath="$BACKUP"
 
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
@@ -112,7 +112,7 @@ WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
 if [[ -d "$2" ]]; then
 
     # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
 
     # Check if there's enough space in the destination directory
     if (( AvailableSpace < WorkDirSize )); then
@@ -133,7 +133,7 @@ fi
 
 while [[ "$BackupPath" != "/" ]]; do
     if [[ $WorkDir == $BackupPath ]]; then
-        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
+        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$BACKUP")""
         exit 1
     fi
     BackupPath="$(dirname "$BackupPath")"
@@ -145,5 +145,5 @@ for dir in "${DIRS[@]}"; do
 done
 
 shopt -s nullglob dotglob
-backup "$WorkDir" "$Backup"
-backup_delete "$WorkDir" "$Backup"
+backup "$WorkDir" "$BACKUP"
+backup_delete "$WorkDir" "$BACKUP"

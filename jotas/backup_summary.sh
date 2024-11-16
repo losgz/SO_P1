@@ -16,7 +16,7 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            mkdirprint "$2/$(basename "$file")" "$Backup";
+            mkdirprint "$2/$(basename "$file")" "$BACKUP";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
@@ -24,7 +24,7 @@ function backup() {
         fi
         local file_copy="$2/$(basename "$file")"
         local simpler_name_workdir="${file#$(dirname "$WorkDir")/}"
-        local simpler_name_backup="${file_copy#$(dirname "$Backup")/}"
+        local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
         local FILE_MODE_DATE=$(stat -c %Y "$file")
         if [ -f "$file_copy" ]; then
             local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
@@ -84,9 +84,10 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
+WorkDir=""
+BACKUP=""
 
-OPTERR=0 
-while getopts "cb:r:" opt; do
+while getopts ":cb:r:" opt; do
     case $opt in
         c)
             CHECKING="1"
@@ -141,8 +142,8 @@ mkdirprint "$2" "$2";
 
 
 WorkDir="$(realpath "$1")"
-Backup="$(realpath "$2")"
-BackupPath="$Backup"
+BACKUP="$(realpath "$2")"
+BackupPath="$BACKUP"
 
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
@@ -150,7 +151,7 @@ WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
 if [[ -d "$2" ]]; then
 
     # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
 
     # Check if there's enough space in the destination directory
     if (( AvailableSpace < WorkDirSize )); then
@@ -173,7 +174,7 @@ fi
 
 while [[ "$BackupPath" != "/" ]]; do
     if [[ $WorkDir == $BackupPath ]]; then
-        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
+        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$BACKUP")""
         summary "$(basename "$WorkDir")" "1" "0" "0" "0" "0" "0" "0"
         exit 1
     fi
@@ -186,6 +187,6 @@ for dir in "${DIRS[@]}"; do
 done
 
 shopt -s nullglob dotglob
-backup "$WorkDir" "$Backup"
+backup "$WorkDir" "$BACKUP"
 echo $file_count
 exit 0

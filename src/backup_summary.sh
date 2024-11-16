@@ -16,15 +16,15 @@ function backup() {
             continue;
         fi
         if [[ -d "$file" ]]; then
-            mkdirprint "$2/$(basename "$file")" "$Backup";
+            mkdirprint "$2/$(basename "$file")" "$BACKUP";
             backup "$file" "$2/$(basename "$file")"
             continue;
         elif [[ ! "$(basename "$file")" =~ $REGEX ]]; then
             continue;
         fi
         local file_copy="$2/$(basename "$file")"
-        local simpler_name_workdir="${file#$(dirname "$WorkDir")/}"
-        local simpler_name_backup="${file_copy#$(dirname "$Backup")/}"
+        local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
+        local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
         local FILE_MODE_DATE=$(stat -c %Y "$file")
         if [ -f "$file_copy" ]; then
             local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
@@ -84,11 +84,10 @@ CHECKING="0"
 DIRS_FILE=""
 REGEX=""
 DIRS=()
-WorkDir=""
-Backup=""
+WORKDIR=""
+BACKUP=""
 
-OPTERR=0 
-while getopts "cb:r:" opt; do
+while getopts ":cb:r:" opt; do
     case $opt in
         c)
             CHECKING="1"
@@ -115,11 +114,11 @@ while getopts "cb:r:" opt; do
             fi
             ;;
         \?)
-            echo "ERROR: Invalid option selected"
+            echo "ERROR: -$OPTARG is an invalid option"
             REGEX="(a"
             ;;
         :)
-            echo "Option -$OPTARG requires an argument."
+            echo "ERROR: Option -$OPTARG requires an argument."
             REGEX="(a"
             ;;
     esac
@@ -130,34 +129,36 @@ if [[ $# -lt 2 ]]; then
     echo "ERROR: Not enough arguments"
     summary "$1" "1" "0" "0" "0" "0" "0" "0"
     exit 1
-elif [[ "$REGEX" == "(a" ]]; then
-    summary "$1" "1" "0" "0" "0" "0" "0" "0"
-    exit 1
 elif [[ ! -d "$1" ]]; then
     echo "ERROR: "$(basename "$1")" is not a directory"
     summary "$1" "1" "0" "0" "0" "0" "0" "0"
     exit 1;
 fi
 
+WORKDIR="$(realpath "$1")"
+if [[ "$REGEX" == "(a" ]]; then
+    summary "$WORKDIR" "1" "0" "0" "0" "0" "0" "0"
+    exit 1
+fi
+
 mkdirprint "$2" "$2";
 
 
-WorkDir="$(realpath "$1")"
-Backup="$(realpath "$2")"
-BackupPath="$Backup"
+BACKUP="$(realpath "$2")"
+BackupPath="$BACKUP"
 
 # Calculate the total size of files in the source directory (in KB)
-WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
 if [[ -d "$2" ]]; then
 
     # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+    AvailableSpace=$(df -k "$BACKUP" | awk 'NR==2 {print $4}')
 
     # Check if there's enough space in the destination directory
     if (( AvailableSpace < WorkDirSize )); then
         echo "ERROR: Not enough space in destination directory."
-        summary "$(basename "$WorkDir")" "1" "0" "0" "0" "0" "0" "0"
+        summary "$(basename "$WORKDIR")" "1" "0" "0" "0" "0" "0" "0"
         exit 1
     fi
 else
@@ -168,15 +169,15 @@ else
     # Check if there's enough space in the destination directory
     if (( AvailableSpace < WorkDirSize )); then
         echo "ERROR: Not enough space in the computer."
-        summary "$(basename "$WorkDir")" "1" "0" "0" "0" "0" "0" "0"
+        summary "$(basename "$WORKDIR")" "1" "0" "0" "0" "0" "0" "0"
         exit 1
     fi
 fi
 
 while [[ "$BackupPath" != "/" ]]; do
-    if [[ $WorkDir == $BackupPath ]]; then
-        echo "ERROR: "$(basename "$WorkDir")" is parent of "$(basename "$Backup")""
-        summary "$(basename "$WorkDir")" "1" "0" "0" "0" "0" "0" "0"
+    if [[ $WORKDIR == $BackupPath ]]; then
+        echo "ERROR: "$(basename "$WORKDIR")" is parent of "$(basename "$BACKUP")""
+        summary "$(basename "$WORKDIR")" "1" "0" "0" "0" "0" "0" "0"
         exit 1
     fi
     BackupPath="$(dirname "$BackupPath")"
@@ -188,6 +189,6 @@ for dir in "${DIRS[@]}"; do
 done
 
 shopt -s nullglob dotglob
-backup "$WorkDir" "$Backup"
+backup "$WORKDIR" "$BACKUP"
 echo $file_count
 exit 0
