@@ -45,10 +45,10 @@ if [[ ! -r "$1" ]]; then
     exit 1
 fi
 
-#if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
-#    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
-#    exit 1
-#fi
+if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
+    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    exit 1
+fi
 
 # Calculate the total size of files in the source directory (in KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')

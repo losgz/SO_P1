@@ -89,6 +89,12 @@ function backup() {
     summary "$1" "$ERRORS" "$WARNINGS" "$FILES_UPDATED" "$FILES_COPIED" "$SIZE_COPIED" "$FILES_DELETED" "$SIZE_REMOVED"
 }
 
+function summary() {
+    local simpler_name="${1#$(dirname "$WORKDIR")/}"
+    #echo -e "While backing "$simpler_name": $2 Errors; $3 Warnings; $4 Updated; $5 Copied (${6}B); $7 Deleted (${8}B)\n"
+    echo "While backuping "$simpler_name": $2 Errors; $3 Warnings; $4 Updated; $5 Copied (${6}B); $7 Deleted (${8}B)"
+}
+
 # Variables for the opts
 CHECKING="0"
 DIRS_FILE=""
@@ -168,7 +174,7 @@ if [[ ! -r "$1" ]]; then
     exit 1
 fi
 
-if [[ ! -w "$2" ]]; then
+if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
     echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
     exit 1
 fi
@@ -215,5 +221,4 @@ done
 
 shopt -s nullglob dotglob
 backup "$WORKDIR" "$BACKUP"
-echo $file_count
 exit 0
