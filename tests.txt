@@ -9,8 +9,6 @@ return 1 quando é warning
 
 To do:
 Testar a cena do espaço (fiz mas não testei), no checking elaborar
-backup delete é capaz de não estar a funcionar
-
 
 Mudanças:
 Olha agora não dá warning se as datas forem iguais, no do stor dá a entender que é assim
