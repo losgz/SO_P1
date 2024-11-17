@@ -39,29 +39,19 @@ function backup() {
         fi
         local file_copy="$2/$(basename "$file")"
         local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
-        if [ -f "$file_copy" ]; then
-            if [ ! -w "$file_copy" ]; then
-                echo "ERROR: "$simpler_name_backup" doenst have write permissions"
-                ((ERRORS++))
-                continue;
-            fi
+        cpprint "$file" "$file_copy"
+        local ret=$?
+        if [[ $ret -eq  0 ]]; then
             local FILE_MODE_DATE=$(stat -c %Y "$file")
             local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
-            if [[ "$FILE_MODE_DATE" -lt "$BAK_FILE_DATE" ]]; then
-                echo "WARNING: backup entry $simpler_name_backup is newer than $simpler_name_workdir; Should not happen"
-                ((WARNINGS++))
-                continue;
-            elif [[ "$FILE_MODE_DATE" -eq "$BAK_FILE_DATE" ]]; then
-                continue;
-            fi
-            ((FILES_UPDATED++))
-        else
             ((FILES_COPIED++))
             ((SIZE_COPIED+=$(stat -c %s "$file")))
-        fi
-        echo "cp -a "$simpler_name_workdir" "$simpler_name_backup""
-        if [[ $CHECKING -eq 0 ]]; then
-            cp -a "$file" "$file_copy";
+        elif [[ $ret -eq  1 ]]; then
+            ((FILES_UPDATED++))
+        elif [[ $ret -eq  3 ]]; then
+            ((WARNINGS++))
+        elif [[ $ret -eq  4 ]]; then
+            ((ERRORS++))
         fi
     done
     if [[ ! -d "$2" ]]; then
