@@ -160,3 +160,4 @@ done
 
 shopt -s nullglob dotglob
 backup "$WORKDIR" "$BACKUP"
+exit 0

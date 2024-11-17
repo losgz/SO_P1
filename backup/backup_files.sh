@@ -68,6 +68,9 @@ fi
 
 shopt -s nullglob dotglob
 for file in "$2"/*; do
+    if [[ -d "$file" ]]; then
+        continue;
+    fi
     if [[ -f "$1/$(basename "$file")" ]]; then
         continue;
     fi
@@ -82,4 +85,6 @@ for file in "$WORKDIR"/*; do
     fi
     cpprint "$file" "$BACKUP/$(basename "$file")"
 done
+
+exit 0
 
