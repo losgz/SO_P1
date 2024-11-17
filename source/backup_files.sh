@@ -41,25 +41,25 @@ if [[ "$BACKUP" == "$WORKDIR" ]]; then
 fi
 
 if [[ ! -r "$1" ]]; then
-    echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+    echo "ERROR: "$(basename "$WORKDIR")" doesnt have read permissions"
     exit 1
 fi
 
 if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
-    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    echo "ERROR: "$(basename "$BACKUP")" doesnt have write permissions"
     exit 1
 fi
 
 # Calcula o espaço total de todos os ficheiros no diretório de trabalho (em KB)
 WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
-directoryThatNeedsToBeChecked="$BACKUP"
+dirToCheck="$BACKUP"
 if [[ ! -d "$2" ]]; then
-    directoryThatNeedsToBeChecked="$(dirname "$BackupPath")" 
+    dirToCheck="$(dirname "$BackupPath")" 
 fi
 
 # Calcula o espaço disponível para se fazer a cópia (em KB)
-AvailableSpace=$(df -k "$directoryThatNeedsToBeChecked" | awk 'NR==2 {print $4}')
+AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
 
 if (( AvailableSpace < WorkDirSize )); then
     echo "ERROR: Not enough space in destination directory."

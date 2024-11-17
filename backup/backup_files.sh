@@ -2,18 +2,18 @@
 
 source ./utils.sh
 
-#Variável usada para se verificar se a opção de checking foi selecionada
-CHECKING="0" 
+CHECKING="0"
+WORKDIR=""
+BACKUP="" 
 
 #Verificação das opções selecionadas
-OPTERR=0 
-while getopts "c" opt; do
+while getopts ":c" opt; do
     case $opt in
         c)
             CHECKING="1"
             ;;
         \?)
-            echo "ERROR: Invalid option selected"
+            echo "ERROR: -$OPTARG is an invalid option"
             exit 1
             ;;
     esac
@@ -23,48 +23,47 @@ done
 shift $((OPTIND - 1))
 
 
-if [[ $# -lt 2 ]]; then
-    echo "ERROR: Not enough arguments"
+if [[ ! $# -eq 2 ]]; then
+    echo "ERROR: The function has two arguments"
     exit 1
 elif [[ ! -d "$1" ]]; then
     echo "ERROR: "$1" not a directory"
     exit 1;
 fi
-WorkDir="$(realpath "$1")"
+WORKDIR="$(realpath "$1")"
 
 mkdirprint "$2" "$2";
 
-Backup="$(realpath "$2")"
-if [[ "$Backup" == "$WorkDir" ]]; then
+BACKUP="$(realpath "$2")"
+if [[ "$BACKUP" == "$WORKDIR" ]]; then
     echo "ERROR: "$1" and "$2" are the same directory"
     exit 1
 fi
 
+if [[ ! -r "$1" ]]; then
+    echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+    exit 1
+fi
 
-# Calculate the total size of files in the source directory (in KB)
-WorkDirSize=$(du -sk "$WorkDir" | awk '{print $1}')
+if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
+    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    exit 1
+fi
 
-if [[ -d "$2" ]]; then
+# Calcula o espaço total de todos os ficheiros no diretório de trabalho (em KB)
+WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
-    # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$Backup" | awk 'NR==2 {print $4}')
+dirToCheck="$BACKUP"
+if [[ ! -d "$2" ]]; then
+    dirToCheck="$(dirname "$BackupPath")" 
+fi
 
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in destination directory."
-        exit 1
-    fi
-else
+# Calcula o espaço disponível para se fazer a cópia (em KB)
+AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
 
-    # Get available space in the computer (in KB)
-    AvailableSpace=$(df -k "/" | awk 'NR==2 {print $4}')
-
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in the computer."
-        exit 1
-    fi
-
+if (( AvailableSpace < WorkDirSize )); then
+    echo "ERROR: Not enough space in destination directory."
+    exit 1
 fi
 
 shopt -s nullglob dotglob
@@ -77,10 +76,10 @@ for file in "$2"/*; do
     fi
 done
 
-for file in "$WorkDir"/*; do
+for file in "$WORKDIR"/*; do
     if [[ -d "$file" ]]; then
         continue;
     fi
-    cpprint "$file" "$Backup/$(basename "$file")"
+    cpprint "$file" "$BACKUP/$(basename "$file")"
 done
 
