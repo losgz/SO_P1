@@ -171,11 +171,13 @@ BackupPath="$BACKUP"
 
 if [[ ! -r "$1" ]]; then
     echo "ERROR: "$(basename "$WORKDIR")" doesnt have read permissions"
+    summary "$WORKDIR" "1" "0" "0" "0" "0" "0" "0"
     exit 1
 fi
 
 if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
     echo "ERROR: "$(basename "$BACKUP")" doesnt have write permissions"
+    summary "$WORKDIR" "1" "0" "0" "0" "0" "0" "0"
     exit 1
 fi
 
