@@ -7,7 +7,7 @@ function backup() {
     if [ ! -r "$1" ]; then
         echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
         return 1;
-    elif [ ! -w "$2" ]; then
+    elif [[ -d "$2" ]] && [ ! -w "$2" ]; then
         echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have writing permissions"
         return 1;
     fi
