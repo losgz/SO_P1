@@ -14,10 +14,12 @@ function backup() {
     if [ ! -r "$1" ]; then
         echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
         ((ERRORS++))
+        summary "$1" "$ERRORS" "$WARNINGS" "$FILES_UPDATED" "$FILES_COPIED" "$SIZE_COPIED" "$FILES_DELETED" "$SIZE_REMOVED"
         return 1;
     elif [ ! -w "$2" ]; then
         echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have writing permissions"
         ((ERRORS++))
+        summary "$1" "$ERRORS" "$WARNINGS" "$FILES_UPDATED" "$FILES_COPIED" "$SIZE_COPIED" "$FILES_DELETED" "$SIZE_REMOVED"
         return 1;
     fi
     for file in "$1"/*; do
