@@ -24,12 +24,6 @@ function backup() {
         if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
-        local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
-        if [ ! -r "$file" ]; then
-            echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
-            ((ERRORS++))
-            continue;
-        fi
         if [[ -d "$file" ]]; then
             mkdirprint "$2/$(basename "$file")" "$BACKUP";
             backup "$file" "$2/$(basename "$file")"
@@ -38,7 +32,6 @@ function backup() {
             continue;
         fi
         local file_copy="$2/$(basename "$file")"
-        local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
         cpprint "$file" "$file_copy"
         local ret=$?
         if [[ $ret -eq  0 ]]; then
