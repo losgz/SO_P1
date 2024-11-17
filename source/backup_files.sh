@@ -36,7 +36,7 @@ mkdirprint "$2" "$2";
 
 BACKUP="$(realpath "$2")"
 if [[ "$BACKUP" == "$WORKDIR" ]]; then
-    echo "ERROR: "$1" and "$2" are the same directory"
+    echo "ERROR: The arguments are equal"
     exit 1
 fi
 
