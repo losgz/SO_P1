@@ -6,11 +6,9 @@ function backup() {
     backup_delete "$1" "$2"
     if [ ! -r "$1" ]; then
         echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
-        ((ERRORS++))
         return 1;
     elif [ ! -w "$2" ]; then
         echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have writing permissions"
-        ((ERRORS++))
         return 1;
     fi
     for file in "$1"/*; do
