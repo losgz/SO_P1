@@ -178,34 +178,22 @@ if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
     exit 1
 fi
 
-checkSpace=0
+# Calculate the total size of files in the source directory (in KB)
+WorkDirSize=$(du -sk "$WORKDIR" 2>/dev/null | awk '{print $1}')
 
-for dir in $(find "$WORKDIR" -type d 2>/dev/null); do
-    if [ ! -r "$dir" ]; then
-        ((checkSpace++))
-        break
-    fi
-done
-
-if [[ $checkSpace -eq 0 ]]; then
-    # Calculate the total size of files in the source directory (in KB)
-    WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
-
-    dirToCheck="$BACKUP"
-    if [[ ! -d "$2" ]]; then
-        dirToCheck="$(dirname "$BackupPath")" 
-    fi
-
-    # Get available space in the destination directory (in KB)
-    AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
-
-    # Check if there's enough space in the destination directory
-    if (( AvailableSpace < WorkDirSize )); then
-        echo "ERROR: Not enough space in destination directory."
-        exit 1
-    fi
+dirToCheck="$BACKUP"
+if [[ ! -d "$2" ]]; then
+    dirToCheck="$(dirname "$BackupPath")" 
 fi
 
+# Get available space in the destination directory (in KB)
+AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
+
+# Check if there's enough space in the destination directory
+if (( AvailableSpace < WorkDirSize )); then
+    echo "ERROR: Not enough space in destination directory."
+    exit 1
+fi
 
 while [[ "$BackupPath" != "/" ]]; do
     if [[ $WORKDIR == $BackupPath ]]; then
