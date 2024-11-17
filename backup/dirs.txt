@@ -1,6 +1,0 @@
-/home/losg/Documents/c/
-backup.sh
-~/SO/projeto1/back/balls.txt
-chaliça/
-~/AED/aula04/
-~/SO/SO_proj1/source/backup w.txt
