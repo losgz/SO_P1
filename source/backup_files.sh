@@ -50,20 +50,30 @@ if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
     exit 1
 fi
 
-# Calcula o espaço total de todos os ficheiros no diretório de trabalho (em KB)
-WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
+checkSpace=0
 
-dirToCheck="$BACKUP"
-if [[ ! -d "$2" ]]; then
-    dirToCheck="$(dirname "$BackupPath")" 
-fi
+for dir in $(find "$WORKDIR" -type d 2>/dev/null); do
+    if [ ! -r "$dir" ]; then
+        ((checkSpace++))
+    fi
+done
 
-# Calcula o espaço disponível para se fazer a cópia (em KB)
-AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
+if [[ $checkSpace -eq 0 ]]; then
+    # Calcula o espaço total de todos os ficheiros no diretório de trabalho (em KB)
+    WorkDirSize=$(du -sk "$WORKDIR" | awk '{print $1}')
 
-if (( AvailableSpace < WorkDirSize )); then
-    echo "ERROR: Not enough space in destination directory."
-    exit 1
+    dirToCheck="$BACKUP"
+    if [[ ! -d "$2" ]]; then
+        dirToCheck="$(dirname "$BackupPath")" 
+    fi
+
+    # Calcula o espaço disponível para se fazer a cópia (em KB)
+    AvailableSpace=$(df -k "$dirToCheck" | awk 'NR==2 {print $4}')
+
+    if (( AvailableSpace < WorkDirSize )); then
+        echo "ERROR: Not enough space in destination directory."
+        exit 1
+    fi
 fi
 
 shopt -s nullglob dotglob
