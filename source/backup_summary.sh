@@ -37,8 +37,6 @@ function backup() {
         cpprint "$file" "$file_copy"
         local ret=$?
         if [[ $ret -eq  0 ]]; then
-            local FILE_MODE_DATE=$(stat -c %Y "$file")
-            local BAK_FILE_DATE=$(stat -c %Y "$file_copy")
             ((FILES_COPIED++))
             ((SIZE_COPIED+=$(stat -c %s "$file")))
         elif [[ $ret -eq  1 ]]; then
