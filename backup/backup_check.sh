@@ -36,16 +36,18 @@ elif [[ ! -d "$1" ]]; then
 elif [[ ! -d "$2" ]]; then
     echo "ERROR: "$(basename "$2")" is not a directory"
     exit 1;
-elif [[ ! -r "$1" ]]; then
-    echo "ERROR: "$(basename "$1")" doesnt have read permissions"
-    exit 1
-elif [[ ! -r "$2" ]]; then
-    echo "ERROR: "$(basename "$1")" doesnt have read permissions"
-    exit 1
 fi
 
 WORKDIR="$(realpath "$1")"
 BACKUP="$(realpath "$2")"
+
+if [[ ! -r "$1" ]]; then
+    echo "ERROR: "$(basename "$WORKDIR")" doesnt have read permissions"
+    exit 1
+elif [[ ! -r "$2" ]]; then
+    echo "ERROR: "$(basename "$BACKUP")" doesnt have read permissions"
+    exit 1
+fi
 
 shopt -s nullglob dotglob
 

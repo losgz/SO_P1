@@ -41,12 +41,12 @@ if [[ "$BACKUP" == "$WORKDIR" ]]; then
 fi
 
 if [[ ! -r "$1" ]]; then
-    echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have permission to read"
+    echo "ERROR: "$(basename "$WORKDIR")" doesnt have read permissions"
     exit 1
 fi
 
 if [[ -d "$2" ]] && [[ ! -w "$2" ]]; then
-    echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have permission to write"
+    echo "ERROR: "$(basename "$BACKUP")" doesnt have write permissions"
     exit 1
 fi
 

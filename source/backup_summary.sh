@@ -11,13 +11,23 @@ function backup() {
     local FILES_DELETED="0"
     local SIZE_COPIED="0"
     local SIZE_REMOVED="0"
+    if [ ! -r "$1" ]; then
+        echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
+        ((ERRORS++))
+        return 1;
+    elif [ ! -w "$2" ]; then
+        echo "ERROR: "${2#$(dirname "$BACKUP")/}" doenst have writing permissions"
+        ((ERRORS++))
+        return 1;
+    fi
     for file in "$1"/*; do
-        if [ ! -r "$file" ]; then
-            echo "ERROR: "$simpler_name_workdir" doenst have permission to read"
-            ((ERRORS++))
+        if is_in_list "$file" "$DIRS_SET" ; then
             continue;
         fi
-        if is_in_list "$file" "$DIRS_SET" ; then
+        local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
+        if [ ! -r "$file" ]; then
+            echo "ERROR: "${1#$(dirname "$WORKDIR")/}" doenst have reading permissions"
+            ((ERRORS++))
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -28,11 +38,10 @@ function backup() {
             continue;
         fi
         local file_copy="$2/$(basename "$file")"
-        local simpler_name_workdir="${file#$(dirname "$WORKDIR")/}"
         local simpler_name_backup="${file_copy#$(dirname "$BACKUP")/}"
         if [ -f "$file_copy" ]; then
             if [ ! -w "$file_copy" ]; then
-                echo "ERROR: "$simpler_name_backup" doenst have permission to read"
+                echo "ERROR: "$simpler_name_backup" doenst have write permissions"
                 ((ERRORS++))
                 continue;
             fi
@@ -62,6 +71,11 @@ function backup() {
 
     for file in "$2"/*; do
         if is_in_list "$file" "$DIRS_SET" ; then
+            continue;
+        fi
+        if [ ! -w "$file" ]; then
+            echo "ERROR: "${file#$(dirname "$BACKUP")/}" doenst have writing permissions"
+            ((ERRORS++))
             continue;
         fi
         if [[ -d "$file" ]]; then
@@ -208,7 +222,8 @@ while [[ "$BackupPath" != "/" ]]; do
 done
 
 for dir in "${DIRS[@]}"; do
-    DIRS_SET["$(realpath "$dir")"]=1
+    expanded_dir=$(eval echo "$dir")
+    DIRS_SET["$(realpath "$expanded_dir")"]=1
 done
 
 shopt -s nullglob dotglob

@@ -3,4 +3,4 @@ backup.sh
 ~/SO/projeto1/back/balls.txt
 chaliça/
 ~/AED/aula04/
-~/SO/projeto1/src/backup w.txt
+~/SO/SO_proj1/source/backup w.txt
