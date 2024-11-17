@@ -55,6 +55,7 @@ checkSpace=0
 for dir in $(find "$WORKDIR" -type d 2>/dev/null); do
     if [ ! -r "$dir" ]; then
         ((checkSpace++))
+        break
     fi
 done
 
