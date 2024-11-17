@@ -3,7 +3,6 @@
 
 testName=test_a1
 
-rm -rf output.txt
 rm -rf backup_test
 cp -r -a backup_$testName backup_test
 
@@ -33,8 +32,7 @@ then
     score=$((score+15))
 fi
 
-#rm -rf output.txt err.txt backup_test
-rm -rf err.txt backup_test
+rm -rf output.txt err.txt backup_test
 
 
 echo Score: $score
