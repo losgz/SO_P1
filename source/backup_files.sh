@@ -75,6 +75,10 @@ for file in "$2"/*; do
     if [[ -f "$1/$(basename "$file")" ]]; then
         continue;
     fi
+    if [[ ! -w $file_copy ]]; then
+        echo "ERROR: "$(basename "$WORKDIR")/$(basename "$file") doesnt have writing permissions""
+        continue;
+    fi
     if [[ $CHECKING -eq "0" ]]; then
         rm "$file"
     fi
@@ -84,7 +88,8 @@ for file in "$WORKDIR"/*; do
     if [[ -d "$file" ]]; then
         continue;
     fi
-    cpprint "$file" "$BACKUP/$(basename "$file")"
+    file_copy="$BACKUP/$(basename "$file")"
+    cpprint "$file" "$file_copy"
 done
 
 exit 0
