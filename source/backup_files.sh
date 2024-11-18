@@ -34,11 +34,6 @@ WORKDIR="$(realpath "$1")"
 
 mkdirprint "$2" "$2";
 
-if [[ ! $? -eq 0 ]]; then
-    echo "Could not create "$2""
-    exit 1
-fi
-
 BACKUP="$(realpath "$2")"
 if [[ "$BACKUP" == "$WORKDIR" ]]; then
     echo "ERROR: The arguments are equal"

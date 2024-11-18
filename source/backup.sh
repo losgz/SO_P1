@@ -113,11 +113,6 @@ fi
 
 mkdirprint "$2" "$2";
 
-if [[ ! $? -eq 0 ]]; then
-    echo "Could not create "$2""
-    exit 1
-fi
-
 WORKDIR="$(realpath "$1")"
 BACKUP="$(realpath "$2")"
 BackupPath="$BACKUP"

@@ -7,7 +7,7 @@ function mkdirprint(){
     local simpler_name="${1#$(dirname "$2")/}"
     echo "mkdir "$simpler_name""
     if [[ $CHECKING -eq 0 ]]; then
-        mkdir "$1" 2>/dev/null
+        mkdir "$1";
         return $?;
     fi
     return 0;
