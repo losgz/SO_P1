@@ -1,5 +1,0 @@
-/home/losg/Documents/c/
-backup.sh
-~/SO/SO_proj1/source/src/
-~/AED/aula04/
-~/SO/SO_proj1/source/backup w.txt
